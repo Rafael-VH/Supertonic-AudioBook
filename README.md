@@ -1,41 +1,54 @@
-# Supertonic-AudioBook
+<div align="center">
 
-Conversor de documentos en Markdown a audios con voz sintética, totalmente local. Lee archivos `.md`, los limpia y sintetiza en español con el motor [Supertonic 3](https://huggingface.co/spaces/Supertone/supertonic-3) (TTS on-device basado en ONNX Runtime): sin nube, sin API, sin GPU.
+# 🎧 Supertonic-AudioBook
+
+**Convertí tus libros Markdown en audiolibros con voz sintética — 100% local.**
+
+Lee capítulos `.md`, los limpia, los segmenta y los sintetiza en español con el motor
+[Supertonic 3](https://huggingface.co/spaces/Supertone/supertonic-3) (TTS on-device basado en ONNX Runtime).
+Sin nube. Sin API. Sin GPU. Sin ffmpeg.
+
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=1f2937)
+![Windows](https://img.shields.io/badge/Windows-ok-0078D6?style=for-the-badge&logo=windows&logoColor=white&labelColor=1f2937)
+![TTS local](https://img.shields.io/badge/TTS-100%25%20local-22c55e?style=for-the-badge&logo=speakerdeck&logoColor=white&labelColor=1f2937)
+![Licencia](https://img.shields.io/badge/Licencia-MIT-22c55e?style=for-the-badge&logo=github&logoColor=white&labelColor=1f2937)
+
+**[Quick start](#quick-start) · [Características](#características) · [Uso](#uso) · [Estructura](#estructura-del-proyecto) · [Empaquetado](#empaquetado) · [Créditos](#créditos)**
+
+---
+
+</div>
+
+## Quick start
 
 ```bash
 pip install supertonic numpy soundfile
 python app/main.py --cli
 ```
 
-Colocá tus archivos `.md` en `archivos/` y los audios aparecerán en `audio/`.
-
-## Quick path
-
-1. **Instalá** las dependencias: `pip install supertonic numpy soundfile` (Python 3.10+).
+1. **Instalá** las dependencias (`Python 3.10+`).
 2. **Poné tus archivos** en `archivos/` (Markdown, un archivo por capítulo o sección).
 3. **Ejecutá** la CLI: `python app/main.py --cli`.
 4. **Escuchá** los resultados en `audio/` (por defecto `capituloN.wav`).
 
-> La primera ejecución descarga el modelo (~1 vez, requiere red). Si copiás una carpeta `modelo/` con los assets junto a los scripts, funciona 100% offline.
+> 💡 **Offline**: la primera ejecución descarga el modelo (~1 vez, requiere red). Si copiás una carpeta `modelo/` con los assets junto a los scripts, funciona 100% sin conexión.
+
+¿Preferís una ventana? La GUI también está lista: `python app/main.py`. Más abajo en [Uso](#uso).
+
+---
 
 ## Características
 
-- **Exportación multi-formato nativa**: `wav`, `flac`, `ogg` y `mp3` sin ffmpeg (varios a la vez separados por coma).
-- **Natural sorting** de capítulos: `capitulo10.md` va después de `capitulo2.md`.
-- **Limpieza automática de Markdown**: títulos, listas, links, imágenes, citas, bloques de código.
-- **Segmentación optimizada para TTS** con soporte de abreviaturas del español (`Dr.`, `Sr.`, `etc.`).
-- **Protección de memoria para libros largos**: volcado incremental a disco desde ~500 MB acumulados.
-- **Tolerante a fallos**: un fragmento que falla no aborta el capítulo.
-- **Dos interfaces**: CLI con argparse y GUI (Tkinter) con selección de capítulos, formatos, voz y parámetros.
-- **Empaquetable en `.exe`**: tanto la app como un instalador portable de un solo archivo.
+| | | |
+|---|---|---|
+| 🎚️ **Multi-formato nativo** | 🔊 **Voz natural en español** | 🧹 **Limpieza automática de Markdown** |
+| `wav`, `flac`, `ogg` y `mp3` sin ffmpeg, varios a la vez. | 10 voces (`M1`–`M5`, `F1`–`F5`), pasos y velocidad ajustables. | Títulos, listas, links, citas y bloques de código, sin restos. |
+| 🧠 **Segmentación optimizada para TTS** | 🛡️ **Protección de memoria** | 🔢 **Natural sorting** |
+| Soporta abreviaturas del español (`Dr.`, `Sr.`, `etc.`) para no cortar oraciones. | Volcado incremental a disco desde ~500 MB: libros largos nunca se pierden. | `capitulo10.md` va después de `capitulo2.md`, no de `capitulo9`. |
+| 🖥️ **CLI + GUI** | 📦 **Empaquetable en `.exe`** | 💪 **Tolerante a fallos** |
+| Terminal con argparse o ventana Tkinter sin congelarse. | Aplicación one-folder e instalador portable de un solo archivo. | Un fragmento que falla no aborta el capítulo. |
 
-## Estructura del proyecto
-
-| Carpeta | Qué contiene | Documentación |
-|---------|--------------|---------------|
-| `app/` | **Versión actual**: código en capas (`domain/`, `data/`, `presentation/`), `main.py` como punto de entrada y spec PyInstaller. | [app/README.md](app/README.md) |
-| `packaging/` | **Instalador portable**: un `.exe` que extrae la app completa junto a sí mismo y la lanza. | [packaging/README.md](packaging/README.md) |
-| `legacy/` | **Versión original (legacy)**: solo WAV, voz fija. Deprecada. | [legacy/README.md](legacy/README.md) |
+---
 
 ## Uso
 
@@ -57,13 +70,13 @@ python app/main.py --cli --verbose
 
 | Opción | Descripción | Default |
 |--------|-------------|---------|
-| `--capitulo, -c` | Procesar solo un capítulo (`capitulo3.md`). | todos |
-| `--voz, -v` | Voz: `M1`–`M5`, `F1`–`F5`. | `M1` |
+| `-c, --capitulo ARCHIVO` | Procesar solo un capítulo (`capitulo3.md`). | todos |
+| `-v, --voz VOZ` | Voz: `M1`–`M5`, `F1`–`F5`. | `M1` |
 | `--steps` | Pasos de inferencia (más = mejor calidad, más lento). | `5` |
 | `--speed` | Velocidad de habla. | `1.1` |
-| `--formato, -f` | Formato(s) de salida: `wav, flac, ogg, mp3`. | `wav` |
-| `--verbose, -V` | Logging DEBUG. | — |
-| `--quiet, -q` | Solo warnings y errores. | — |
+| `-f, --formato FORMATOS` | Formato(s) de salida: `wav, flac, ogg, mp3`. | `wav` |
+| `-V, --verbose` | Logging DEBUG. | — |
+| `-q, --quiet` | Solo warnings y errores. | — |
 
 ### GUI
 
@@ -71,9 +84,13 @@ python app/main.py --cli --verbose
 python app/main.py
 ```
 
-Ventana Tkinter con lista de capítulos (`Todo` / `Nada` / `Refrescar`, multiselección con `Ctrl+clic`), carpetas de entrada/salida, formatos, voz, sliders de pasos (5–12) y velocidad (0.7–2.0), barra de progreso y panel de log. Se procesa en un hilo aparte (la interfaz no se congela) y `Cancelar` exporta lo generado hasta el momento.
+Ventana Tkinter con selección de capítulos (`Todo` / `Nada` / `Refrescar`, multiselección con `Ctrl+clic`),
+carpetas de entrada/salida, formatos, voz y sliders de pasos (5–12) y velocidad (0.7–2.0).
+Se procesa en un hilo aparte (la interfaz nunca se congela) y `Cancelar` exporta lo generado hasta el momento.
 
-Self-test del motor sin abrir la ventana:
+### Self-test
+
+Verificá el motor y una síntesis real sin abrir la ventana (pensado para el ejecutable empaquetado):
 
 ```bash
 python app/main.py --self-test
@@ -83,12 +100,24 @@ Escribe `audio/_self_test.wav` y termina con `SELF-TEST OK` (exit 0) o `SELF-TES
 
 ### Portable
 
-Para distribuir al usuario final: los instaladores portables de `packaging/`. Al ejecutarse en cualquier PC con Windows extraen la app (ejecutable + dependencias + modelo) a la carpeta del propio instalador y la lanzan. No requieren Python. Más detalle en [packaging/README.md](packaging/README.md).
+Para el usuario final: instaladores de un solo `.exe` que extraen la app completa junto a sí mismos y la lanzan.
+No requieren Python. Más detalle en [`packaging/README.md`](packaging/README.md).
 
-Hay dos variantes:
+| Instalador | Tamaño aprox. | Modelo TTS |
+|---|---|---|
+| `SupertonicAudioBook-Portable.exe` | ~417 MB | ✅ Incluido — funciona sin conexión |
+| `SupertonicAudioBook-Portable-Lite.exe` | ~60 MB | ⬇️ Se descarga solo al primer uso (requiere internet) |
 
-- **Completa** (`SupertonicAudioBook-Portable.exe`, ~417 MB): incluye el modelo TTS, funciona sin conexión.
-- **Lite** (`SupertonicAudioBook-Portable-Lite.exe`, ~60 MB): no incluye el modelo; lo descarga solo al primer uso (requiere internet).
+---
+
+## Estructura del proyecto
+
+| Carpeta | Qué contiene | Documentación |
+|---------|--------------|---------------|
+| `app/` | **Versión actual** — código en capas (`domain/`, `data/`, `presentation/`), `main.py` como punto de entrada y spec PyInstaller. | [`app/README.md`](app/README.md) |
+| `docs/` | **Documentación completa** — arquitectura, dominio, datos, presentación y empaquetado. | [`docs/README.md`](docs/README.md) |
+| `packaging/` | **Instalador portable** — un `.exe` que extrae la app completa junto a sí mismo y la lanza. | [`packaging/README.md`](packaging/README.md) |
+| `legacy/` | **Versión original** — solo WAV, voz fija. Deprecada. | [`legacy/README.md`](legacy/README.md) |
 
 ## Convenciones de carpetas
 
@@ -100,16 +129,19 @@ Hay dos variantes:
 
 En la CLI las carpetas son relativas al directorio de trabajo; en la GUI se eligen desde la ventana.
 
+---
+
 ## Empaquetado
 
-La app se compila a un `.exe` (one-folder, sin consola) con PyInstaller desde `app/`:
+La app se compila a un `.exe` (one-folder, sin consola) con PyInstaller:
 
 ```bash
 pip install pyinstaller
 pyinstaller app/SupertonicAudioBook.spec
 ```
 
-Produce `app/dist/SupertonicAudioBook/SupertonicAudioBook.exe`. Para distribuir sin conexión, copiá `modelo/` junto al `.exe` y verificá con `SupertonicAudioBook.exe --self-test`.
+Produce `app/dist/SupertonicAudioBook/SupertonicAudioBook.exe`. Para distribuir sin conexión,
+copiá `modelo/` junto al `.exe` y verificá con `SupertonicAudioBook.exe --self-test`.
 
 Los instaladores portables se construyen contra la app ya compilada con un solo comando:
 
@@ -117,12 +149,19 @@ Los instaladores portables se construyen contra la app ya compilada con un solo 
 python packaging/build_portables.py
 ```
 
-Produce `packaging/dist/SupertonicAudioBook-Portable.exe` (completa, con modelo) y `packaging/dist/SupertonicAudioBook-Portable-Lite.exe` (lite, sin modelo). Para la variante completa, copiá `modelo/` en `app/dist/SupertonicAudioBook` antes de construir.
+Produce `packaging/dist/SupertonicAudioBook-Portable.exe` (completa, con modelo) y
+`packaging/dist/SupertonicAudioBook-Portable-Lite.exe` (lite, sin modelo). Para la variante completa,
+copiá `modelo/` en `app/dist/SupertonicAudioBook` antes de construir.
+
+---
 
 ## Créditos
 
-Supertonic-AudioBook es un proyecto independiente que usa el motor de síntesis [Supertonic 3](https://huggingface.co/supertone-inc/supertonic-3) de [Supertone Inc.](https://www.supertone.ai/) — TTS local, on-device, de 99M parámetros con soporte para 31 idiomas. El modelo se distribuye bajo la licencia OpenRAIL-M; consultá los términos en el [repositorio del modelo](https://huggingface.co/Supertone/supertonic-3).
+Supertonic-AudioBook es un proyecto independiente que usa el motor de síntesis
+[Supertonic 3](https://huggingface.co/supertone-inc/supertonic-3) de [Supertone Inc.](https://www.supertone.ai/)
+— TTS local, on-device, de 99M parámetros con soporte para 31 idiomas. El modelo se distribuye bajo la
+licencia OpenRAIL-M; consultá los términos en el [repositorio del modelo](https://huggingface.co/Supertone/supertonic-3).
 
 ## Licencia
 
-El código de este proyecto se distribuye bajo la MIT License.
+El código de este proyecto se distribuye bajo la **MIT License**.
