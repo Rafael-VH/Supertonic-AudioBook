@@ -2,6 +2,15 @@
 
 Un único `.exe` que, al ejecutarse en cualquier PC con Windows, extrae la aplicación completa (ejecutable + dependencias + modelo TTS) en una carpeta junto a sí mismo y la lanza. No requiere instalar Python ni nada más: todo viaja empaquetado dentro del instalador.
 
+Hay **dos variantes** del instalador:
+
+| Instalador | Tamaño aprox. | Modelo TTS |
+|---|---|---|
+| `SupertonicAudioBook-Portable.exe` | ~417 MB | **Incluido** (funciona sin conexión) |
+| `SupertonicAudioBook-Portable-Lite.exe` | ~60 MB | No incluido; se **descarga solo al primer uso** (requiere conexión a internet) |
+
+Ambas se generan con un solo comando. Los detalles de la variante Lite están en la sección [Instalador Lite (sin modelo)](#instalador-lite-sin-modelo).
+
 ## Qué es
 
 `instalador_portable.py` es un instalador de un solo archivo. Se compila con PyInstaller en modo one-file y, al ejecutarlo, deja una instalación portable de **Supertonic-AudioBook** en la carpeta del propio instalador, lista para usarse desde ahí.
@@ -32,14 +41,55 @@ Si se ejecuta el script como Python normal (`python instalador_portable.py`), no
 
 ## Cómo construir el instalador
 
-1. Verificá que la carpeta de la app compilada exista en la ruta que apunta el `.spec`.
-2. Ejecutá PyInstaller con el `.spec`:
+El script `build_portables.py` prepara el staging sin modelo y genera **ambos** instaladores. No compila la aplicación: esa es responsabilidad de `new/` (ver `new/README.md`); este script solo lee la app ya compilada.
 
 ```bash
-pyinstaller SupertonicAudioBook-Portable.spec
+python build_portables.py
 ```
 
-3. El instalador queda en `dist\SupertonicAudioBook-Portable.exe`.
+Requisitos previos:
+
+- Windows y Python 3 con PyInstaller instalado (`pip install pyinstaller`).
+- La aplicación compilada en `new/dist/SupertonicAudioBook` (desde `new/` con `new\SupertonicAudioBook.spec`).
+- Para la variante completa, el modelo TTS en `new/dist/SupertonicAudioBook\modelo`. Podés descargarlo corriendo la app una vez (`SupertonicAudioBook.exe --self-test`) o copiándolo al dist. Para la variante Lite no hace falta.
+
+Qué hace cada paso:
+
+1. **Verifica** que la app esté compilada en `new/dist/SupertonicAudioBook`. Si no, te avisa y te manda a `new/`; no compila nada por su cuenta.
+2. **Prepara el staging Lite**: copia `new/dist/SupertonicAudioBook` a `portable/staging_lite/SupertonicAudioBook` **sin** la carpeta `modelo`.
+3. **Compila el instalador completo** (`SupertonicAudioBook-Portable.spec`): empaqueta el dist completo, modelo incluido.
+4. **Compila el instalador Lite** (`SupertonicAudioBook-Portable-Lite.spec`): empaqueta el staging sin modelo. El `.spec` lee la ruta desde la variable `SUPERTONIC_APP_DIST`, que el script define automáticamente.
+
+Los dos instaladores quedan en `dist\`:
+
+```text
+dist\SupertonicAudioBook-Portable.exe
+dist\SupertonicAudioBook-Portable-Lite.exe
+```
+
+### Variantes de construcción
+
+| Comando | Qué hace |
+|---|---|
+| `python build_portables.py` | Genera los dos instaladores (exige el modelo) |
+| `python build_portables.py --solo-lite` | Solo el instalador Lite (no exige el modelo) |
+| `pyinstaller SupertonicAudioBook-Portable.spec` | Solo el instalador completo (el dist debe existir) |
+| `pyinstaller SupertonicAudioBook-Portable-Lite.spec` | Solo el instalador Lite (el staging debe existir) |
+
+## Instalador Lite (sin modelo)
+
+`SupertonicAudioBook-Portable-Lite.exe` trae la misma aplicación pero **sin el modelo TTS**. El modelo pesa ~385 MB, por eso este instalador es mucho más chico (~60 MB).
+
+### Primer uso
+
+- Al abrir la app por primera vez, **necesita conexión a internet**.
+- La app descarga el modelo automáticamente a la carpeta `SupertonicAudioBook\modelo` (junto al exe). Lo hace gracias a `TTS(auto_download=True)` y a que la app fija `SUPERTONIC_CACHE_DIR` en esa carpeta.
+- La descarga ocurre una sola vez: después, el modelo queda guardado y la app funciona sin conexión, igual que en la variante completa.
+
+### Consideraciones
+
+- Si la PC del usuario no tiene internet, conviene usar la variante completa.
+- El modelo descargado y el incluido en el instalador completo son el mismo; no se descarga dos veces si ya existe en `modelo`.
 
 ## Uso (usuario final)
 
