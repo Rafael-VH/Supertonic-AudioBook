@@ -1,18 +1,18 @@
 # Supertonic-AudioBook
 
-Conversor de fanfiction a audios con voz sintética, totalmente local. Lee capítulos en Markdown, los limpia y sintetiza en español con el motor [Supertonic 3](https://huggingface.co/spaces/Supertone/supertonic-3) (TTS on-device basado en ONNX Runtime): sin nube, sin API, sin GPU.
+Conversor de documentos en Markdown a audios con voz sintética, totalmente local. Lee archivos `.md`, los limpia y sintetiza en español con el motor [Supertonic 3](https://huggingface.co/spaces/Supertone/supertonic-3) (TTS on-device basado en ONNX Runtime): sin nube, sin API, sin GPU.
 
 ```bash
 pip install supertonic numpy soundfile
 python new/lector_fanfiction_mejorado.py
 ```
 
-Colocá tus capítulos `.md` en `fanfic/` y los audios aparecerán en `audio/`.
+Colocá tus archivos `.md` en `archivos/` y los audios aparecerán en `audio/`.
 
 ## Quick path
 
 1. **Instalá** las dependencias: `pip install supertonic numpy soundfile` (Python 3.10+).
-2. **Poné tus capítulos** en `fanfic/` (Markdown, un archivo por capítulo).
+2. **Poné tus archivos** en `archivos/` (Markdown, un archivo por capítulo o sección).
 3. **Ejecutá** la CLI desde la raíz: `python new/lector_fanfiction_mejorado.py`.
 4. **Escuchá** los resultados en `audio/` (por defecto `capituloN.wav`).
 
@@ -89,7 +89,7 @@ Para distribuir al usuario final: `portable/SupertonicReader-Portable.exe` (comp
 
 | Carpeta | Rol |
 |---------|-----|
-| `fanfic/` | Capítulos de entrada (`.md`). Se crea automáticamente. |
+| `archivos/` | Entrada (documentos `.md`). Se crea automáticamente. |
 | `audio/` | Audios de salida, un archivo por capítulo. Se crea automáticamente. |
 | `modelo/` | Caché offline del modelo (assets ONNX + voces). Si existe, la app no necesita red. |
 

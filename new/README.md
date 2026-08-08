@@ -42,7 +42,7 @@ pip install pyinstaller     # opcional: para empaquetar el .exe
 
 ## Uso — CLI
 
-Desde la carpeta del proyecto, con los capítulos `.md` dentro de `fanfic/`:
+Desde la carpeta del proyecto, con los capítulos `.md` dentro de `archivos/`:
 
 ```bash
 python lector_fanfiction_mejorado.py
@@ -57,7 +57,7 @@ python lector_fanfiction_mejorado.py --verbose
 
 | Opción | Descripción | Default |
 |--------|-------------|---------|
-| `--capitulo, -c ARCHIVO` | Procesar solo un capítulo (ej: `capitulo3.md`). Debe existir dentro de `fanfic/`. Sin esta opción se procesan todos los `.md` encontrados. | todos |
+| `--capitulo, -c ARCHIVO` | Procesar solo un capítulo (ej: `capitulo3.md`). Debe existir dentro de `archivos/`. Sin esta opción se procesan todos los `.md` encontrados. | todos |
 | `--voz, -v` | Voz a usar. Voces disponibles: `M1`–`M5`, `F1`–`F5`. | `M1` |
 | `--steps` | Pasos de inferencia del TTS. Más pasos = mejor calidad, más lento. | `5` |
 | `--speed` | Velocidad de habla (`1.0` = normal). | `1.1` |
@@ -83,7 +83,7 @@ python lector_gui.py
 
 La ventana permite:
 
-- Elegir la **carpeta de entrada** (por defecto `fanfic/`) y ver la lista de capítulos `.md`.
+- Elegir la **carpeta de entrada** (por defecto `archivos/`) y ver la lista de capítulos `.md`.
   - Botones `Todo`, `Nada` y `Refrescar`.
   - `Ctrl+clic` para elegir varios; sin selección se procesan todos.
 - Elegir la **carpeta de salida** (por defecto `audio/`).
@@ -111,7 +111,7 @@ Escribe `audio/_self_test.wav`, imprime `SELF-TEST OK` (exit code `0`) o `SELF-T
 
 | Carpeta | Rol |
 |---------|-----|
-| `fanfic/` | Capítulos de entrada (`.md`). Se crea automáticamente si no existe. |
+| `archivos/` | Capítulos de entrada (`.md`). Se crea automáticamente si no existe. |
 | `audio/` | Audio de salida. Se crea automáticamente; cada archivo usa el nombre del capítulo (ej: `capitulo3.wav`). |
 | `modelo/` | Caché offline del modelo (assets ONNX + voces). En el ejecutable empaquetado, si esta carpeta existe junto al `.exe` la app funciona sin red; si no existe, el modelo se descarga al primer uso. |
 

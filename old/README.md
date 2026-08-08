@@ -8,7 +8,7 @@
 
 Flujo de trabajo:
 
-1. Lee los archivos `.md` de la carpeta `fanfic/`.
+1. Lee los archivos `.md` de la carpeta `archivos/`.
 2. Limpia el Markdown (encabezados, negritas, cursivas, enlaces, citas, listas, bloques de código, etc.).
 3. Segmenta el texto en fragmentos de hasta ~1500 caracteres para sintetizar.
 4. Sintetiza cada fragmento en español (voz `M1`, `total_steps=5`, `speed=1.1`), insertando 0.6 s de silencio entre fragmentos.
@@ -27,10 +27,10 @@ Flujo de trabajo:
 
 El script crea automáticamente las carpetas si no existen:
 
-- `fanfic/` — entrada: coloca aquí los capítulos en Markdown (`.md`).
+- `archivos/` — entrada: coloca aquí los capítulos en Markdown (`.md`).
 - `audio/` — salida: un archivo WAV por capítulo (`audio/<nombre_del_capitulo>.wav`).
 
-Si `fanfic/` está vacía o no tiene archivos `.md`, el script avisa y termina.
+Si `archivos/` está vacía o no tiene archivos `.md`, el script avisa y termina.
 
 ## Requisitos
 
@@ -46,7 +46,7 @@ Si `fanfic/` está vacía o no tiene archivos `.md`, el script avisa y termina.
    pip install supertonic numpy soundfile
    ```
 
-2. Crea `fanfic/` y coloca tus capítulos en Markdown (por ejemplo, `capitulo_01.md`).
+2. Crea `archivos/` y coloca tus capítulos en Markdown (por ejemplo, `capitulo_01.md`).
 
 3. Ejecuta:
 

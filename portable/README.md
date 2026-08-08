@@ -14,7 +14,7 @@ El resultado es `SupertonicReader-Portable.exe`, un instalador sin consola (`con
 2. Al ejecutar el instalador, PyInstaller extrae el payload a un directorio temporal accesible como `sys._MEIPASS`.
 3. El script toma la carpeta `SupertonicReader` de ese directorio de extracción (`_carpeta_origen`).
 4. La copia a `carpeta_del_instalador\SupertonicReader` (`_carpeta_destino`), mostrando una ventana con barra de progreso y contador de MB.
-5. Recrea explícitamente las carpetas `fanfic` y `audio`, porque PyInstaller descarta las carpetas vacías del payload y la app espera que existan.
+5. Recrea explícitamente las carpetas `archivos` y `audio`, porque PyInstaller descarta las carpetas vacías del payload y la app espera que existan.
 6. Lanza `SupertonicReader.exe` desde su carpeta de destino y termina.
 
 Si se ejecuta el script como Python normal (`python instalador_portable.py`), no existe `_MEIPASS` y se toma como origen la carpeta `SupertonicReader` junto al propio script.
@@ -45,7 +45,7 @@ pyinstaller SupertonicReader-Portable.spec
 
 1. Copiá `SupertonicReader-Portable.exe` a la carpeta donde querés dejar la instalación portable.
 2. Ejecutalo con doble clic.
-   - **Primera ejecución**: se abre la ventana "Supertonic Reader — Instalador" con una barra de progreso. Copia la aplicación completa a la subcarpeta `SupertonicReader` (junto al instalador) y al terminar lanza la app.
+    - **Primera ejecución**: se abre la ventana "Supertonic-AudioBook — Instalador" con una barra de progreso. Copia la aplicación completa a la subcarpeta `SupertonicReader` (junto al instalador) y al terminar lanza la app.
    - **Ejecuciones siguientes**: si la instalación ya existe y está actualizada, lanza la app directamente, sin mostrar ventana.
 3. La app queda instalada de forma permanente en esa carpeta: se puede ejecutar desde ahí sin volver a correr el instalador.
 
@@ -54,4 +54,4 @@ pyinstaller SupertonicReader-Portable.spec
 - **Comprobación de actualización**: el instalador compara únicamente el tamaño de `SupertonicReader.exe` entre el payload empaquetado y el archivo ya instalado. Si el tamaño coincide, se asume que la instalación está al día y se omite la copia.
 - **Lanzamiento**: la app se inicia con `cwd` apuntando a su propia carpeta de destino, y el instalador termina sin esperarla.
 - **Errores**: si la copia falla, se muestra un cuadro "Error al instalar" y el proceso sale con código 1.
-- **Carpetas de datos**: `fanfic` y `audio` se recrean vacías si no vienen en el payload (PyInstaller descarta directorios vacíos). No se borran instalaciones previas antes de copiar.
+- **Carpetas de datos**: `archivos` y `audio` se recrean vacías si no vienen en el payload (PyInstaller descarta directorios vacíos). No se borran instalaciones previas antes de copiar.
