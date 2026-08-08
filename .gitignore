@@ -1,0 +1,19 @@
+# Builds (PyInstaller)
+new/dist/
+portable/dist/
+build/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Datos de entrada/salida (audio, capítulos, modelo offline)
+audio/
+fanfic/
+modelo/
+
+# Entorno local
+.atl/
+.venv/
+venv/
