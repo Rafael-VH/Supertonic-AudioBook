@@ -7,7 +7,7 @@ carpeta junto a sí mismo y la lanza. No requiere instalar Python ni
 nada más: todo viaja empaquetado dentro del instalador.
 
 La aplicación se embebe en el build con --add-data (PyInstaller), así
-que este script solo copia la carpeta ``SupertonicReader`` desde el
+que este script solo copia la carpeta ``SupertonicAudioBook`` desde el
 directorio de extracción (_MEIPASS) hacia el lado del instalador.
 """
 
@@ -23,18 +23,18 @@ from tkinter import ttk
 def _carpeta_origen() -> Path:
     """Carpeta de la app extraída por PyInstaller en memoria/temp."""
     base = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
-    return base / "SupertonicReader"
+    return base / "SupertonicAudioBook"
 
 
 def _carpeta_destino() -> Path:
     """Coloca la app junto al instalador (portable: todo queda junto)."""
-    return Path(sys.executable).resolve().parent / "SupertonicReader"
+    return Path(sys.executable).resolve().parent / "SupertonicAudioBook"
 
 
 def _instalado_actualizado(origen: Path, destino: Path) -> bool:
     """True si ya existe la app y el ejecutable coincide con el empaquetado."""
-    src = origen / "SupertonicReader.exe"
-    dst = destino / "SupertonicReader.exe"
+    src = origen / "SupertonicAudioBook.exe"
+    dst = destino / "SupertonicAudioBook.exe"
     return src.exists() and dst.exists() and src.stat().st_size == dst.stat().st_size
 
 
@@ -69,7 +69,7 @@ def _lanzar(exe: Path) -> None:
 def main() -> None:
     origen = _carpeta_origen()
     destino = _carpeta_destino()
-    app_exe = destino / "SupertonicReader.exe"
+    app_exe = destino / "SupertonicAudioBook.exe"
 
     if _instalado_actualizado(origen, destino):
         _lanzar(app_exe)

@@ -83,7 +83,7 @@ Escribe `audio/_self_test.wav` y termina con `SELF-TEST OK` (exit 0) o `SELF-TES
 
 ### Portable
 
-Para distribuir al usuario final: `portable/SupertonicReader-Portable.exe` (compilado desde `portable/`). Al ejecutarse en cualquier PC con Windows extrae la app (ejecutable + dependencias + modelo) a la carpeta del propio instalador y la lanza. No requiere Python. Más detalle en [portable/README.md](portable/README.md).
+Para distribuir al usuario final: `portable/SupertonicAudioBook-Portable.exe` (compilado desde `portable/`). Al ejecutarse en cualquier PC con Windows extrae la app (ejecutable + dependencias + modelo) a la carpeta del propio instalador y la lanza. No requiere Python. Más detalle en [portable/README.md](portable/README.md).
 
 ## Convenciones de carpetas
 
@@ -101,18 +101,18 @@ La app se compila a un `.exe` (one-folder, sin consola) con PyInstaller desde `n
 
 ```bash
 pip install pyinstaller
-pyinstaller new/SupertonicReader.spec
+pyinstaller new/SupertonicAudioBook.spec
 ```
 
-Produce `new/dist/SupertonicReader/SupertonicReader.exe`. Para distribuir sin conexión, copiá `modelo/` junto al `.exe` y verificá con `SupertonicReader.exe --self-test`.
+Produce `new/dist/SupertonicAudioBook/SupertonicAudioBook.exe`. Para distribuir sin conexión, copiá `modelo/` junto al `.exe` y verificá con `SupertonicAudioBook.exe --self-test`.
 
 El instalador portable se construye desde `portable/` contra la app ya compilada:
 
 ```bash
-pyinstaller portable/SupertonicReader-Portable.spec
+pyinstaller portable/SupertonicAudioBook-Portable.spec
 ```
 
-Produce `portable/dist/SupertonicReader-Portable.exe`. La ruta de la app compilada está fijada en el `.spec` (ajustá `datas` si compilás en otro lugar).
+Produce `portable/dist/SupertonicAudioBook-Portable.exe`. La ruta de la app compilada está fijada en el `.spec` (ajustá `datas` si compilás en otro lugar).
 
 ## Créditos
 

@@ -98,7 +98,7 @@ Verifica el motor y una síntesis real sin abrir la ventana. Pensado para probar
 
 ```bash
 python lector_gui.py --self-test
-SupertonicReader.exe --self-test
+SupertonicAudioBook.exe --self-test
 ```
 
 Escribe `audio/_self_test.wav`, imprime `SELF-TEST OK` (exit code `0`) o `SELF-TEST FAIL` (exit code `1`).
@@ -130,20 +130,20 @@ En la CLI las carpetas son relativas al directorio de trabajo. En la GUI se pued
 
 ## Empaquetado con PyInstaller
 
-El proyecto incluye `SupertonicReader.spec`, que genera una build **one-folder** (ventana, sin consola) a partir de `lector_gui.py`:
+El proyecto incluye `SupertonicAudioBook.spec`, que genera una build **one-folder** (ventana, sin consola) a partir de `lector_gui.py`:
 
 ```bash
-pyinstaller SupertonicReader.spec
+pyinstaller SupertonicAudioBook.spec
 ```
 
 El spec recolecta automáticamente los datos de `huggingface_hub` (`collect_all`) y produce:
 
 ```
-dist/SupertonicReader/SupertonicReader.exe
+dist/SupertonicAudioBook/SupertonicAudioBook.exe
 ```
 
-Para distribuir sin conexión, copia la carpeta `modelo/` al lado del `SupertonicReader.exe` (en la versión empaquetada, `SUPERTONIC_CACHE_DIR` apunta automáticamente a esa carpeta). Verifica la instalación con:
+Para distribuir sin conexión, copia la carpeta `modelo/` al lado del `SupertonicAudioBook.exe` (en la versión empaquetada, `SUPERTONIC_CACHE_DIR` apunta automáticamente a esa carpeta). Verifica la instalación con:
 
 ```bash
-SupertonicReader.exe --self-test
+SupertonicAudioBook.exe --self-test
 ```
