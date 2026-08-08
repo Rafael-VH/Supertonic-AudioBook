@@ -1,10 +1,10 @@
-# Supertonic Reader — Instalador portable
+# Supertonic-AudioBook — Instalador portable
 
 Un único `.exe` que, al ejecutarse en cualquier PC con Windows, extrae la aplicación completa (ejecutable + dependencias + modelo TTS) en una carpeta junto a sí mismo y la lanza. No requiere instalar Python ni nada más: todo viaja empaquetado dentro del instalador.
 
 ## Qué es
 
-`instalador_portable.py` es un instalador de un solo archivo. Se compila con PyInstaller en modo one-file y, al ejecutarlo, deja una instalación portable de **Supertonic Reader** en la carpeta del propio instalador, lista para usarse desde ahí.
+`instalador_portable.py` es un instalador de un solo archivo. Se compila con PyInstaller en modo one-file y, al ejecutarlo, deja una instalación portable de **Supertonic-AudioBook** en la carpeta del propio instalador, lista para usarse desde ahí.
 
 El resultado es `SupertonicReader-Portable.exe`, un instalador sin consola (`console=False`) pensado para el usuario final.
 
@@ -24,7 +24,7 @@ Si se ejecuta el script como Python normal (`python instalador_portable.py`), no
 ### Para construir el instalador
 
 - Windows y Python 3 con PyInstaller instalado (`pip install pyinstaller`).
-- La aplicación **Supertonic Reader ya compilada** en la ruta declarada en el `.spec`: `C:\Users\rafae\Music\Supertonic\new\dist\SupertonicReader`. Esa carpeta debe contener `SupertonicReader.exe`, sus dependencias y el modelo TTS. Si la app se compila en otra ruta, ajustá `datas` en `SupertonicReader-Portable.spec`.
+- La aplicación **Supertonic-AudioBook ya compilada** en la ruta declarada en el `.spec`: `C:\Users\rafae\Music\Supertonic\new\dist\SupertonicReader`. Esa carpeta debe contener `SupertonicReader.exe`, sus dependencias y el modelo TTS. Si la app se compila en otra ruta, ajustá `datas` en `SupertonicReader-Portable.spec`.
 
 ### Para el usuario final
 

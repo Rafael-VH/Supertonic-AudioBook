@@ -1,4 +1,4 @@
-# Supertonic Reader
+# Supertonic-AudioBook
 
 Conversor de fanfiction a audios con voz sintética, totalmente local. Lee capítulos en Markdown, los limpia y sintetiza en español con el motor [Supertonic 3](https://huggingface.co/spaces/Supertone/supertonic-3) (TTS on-device basado en ONNX Runtime): sin nube, sin API, sin GPU.
 
@@ -116,7 +116,7 @@ Produce `portable/dist/SupertonicReader-Portable.exe`. La ruta de la app compila
 
 ## Créditos
 
-Supertonic Reader es un proyecto independiente que usa el motor de síntesis [Supertonic 3](https://huggingface.co/supertone-inc/supertonic-3) de [Supertone Inc.](https://www.supertone.ai/) — TTS local, on-device, de 99M parámetros con soporte para 31 idiomas. El modelo se distribuye bajo la licencia OpenRAIL-M; consultá los términos en el [repositorio del modelo](https://huggingface.co/Supertone/supertonic-3).
+Supertonic-AudioBook es un proyecto independiente que usa el motor de síntesis [Supertonic 3](https://huggingface.co/supertone-inc/supertonic-3) de [Supertone Inc.](https://www.supertone.ai/) — TTS local, on-device, de 99M parámetros con soporte para 31 idiomas. El modelo se distribuye bajo la licencia OpenRAIL-M; consultá los términos en el [repositorio del modelo](https://huggingface.co/Supertone/supertonic-3).
 
 ## Licencia
 

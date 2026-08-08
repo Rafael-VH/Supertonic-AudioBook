@@ -1,4 +1,4 @@
-# Supertonic Reader
+# Supertonic-AudioBook
 
 Conversor de capítulos en Markdown a audios con voz sintética, basado en el motor [Supertonic 3](https://huggingface.co/spaces/Supertone/supertonic-3) (TTS local, on-device, sin llamadas a la nube).
 
