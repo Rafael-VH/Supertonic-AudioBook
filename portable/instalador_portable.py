@@ -1,5 +1,5 @@
 """
-instalador_portable.py — Instalador portable de Supertonic Reader.
+instalador_portable.py — Instalador portable de Supertonic-AudioBook.
 
 Un único .exe que, al ejecutarse en cualquier PC con Windows, extrae la
 aplicación completa (ejecutable + dependencias + modelo TTS) en una
@@ -76,10 +76,10 @@ def main() -> None:
         return
 
     root = tk.Tk()
-    root.title("Supertonic Reader — Instalador")
+    root.title("Supertonic-AudioBook — Instalador")
     root.geometry("440x120")
     root.resizable(False, False)
-    ttk.Label(root, text="Instalando Supertonic Reader...").pack(pady=(14, 4))
+    ttk.Label(root, text="Instalando Supertonic-AudioBook...").pack(pady=(14, 4))
     barra = ttk.Progressbar(root, maximum=100)
     barra.pack(fill="x", padx=20, pady=6)
     lbl = ttk.Label(root, text="Preparando...")
@@ -90,7 +90,7 @@ def main() -> None:
         _copiar_con_progreso(origen, destino, root, barra, lbl)
         # PyInstaller descarta las carpetas vacías del payload: se recrean
         # explícitamente las que la app espera tener.
-        for nombre in ("fanfic", "audio"):
+        for nombre in ("archivos", "audio"):
             (destino / nombre).mkdir(parents=True, exist_ok=True)
     except Exception as exc:
         root.destroy()

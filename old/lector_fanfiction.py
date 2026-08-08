@@ -5,15 +5,15 @@ import soundfile as sf
 from supertonic import TTS
 
 def crear_carpetas_si_no_existen():
-    for carpeta in ["fanfic", "audio"]:
+    for carpeta in ["archivos", "audio"]:
         if not os.path.exists(carpeta):
             os.makedirs(carpeta)
             print(f"[+] Carpeta creada: {carpeta}/")
 
-def listar_archivos_md(carpeta="fanfic"):
+def listar_archivos_md(carpeta="archivos"):
     archivos = [f for f in os.listdir(carpeta) if f.lower().endswith(".md")]
     if not archivos:
-        print("[!] No se encontraron archivos .md en la carpeta 'fanfic/'.")
+        print("[!] No se encontraron archivos .md en la carpeta 'archivos/'.")
         print("    Coloca tus capitulos alli (formato Markdown).")
         return []
     print(f"[*] Detectados {len(archivos)} capitulo(s): {', '.join(archivos)}")
@@ -90,7 +90,7 @@ def cargar_tts(voz="M1"):
     return _TTS_ENGINE, style
 
 def procesar_capitulo(nombre_archivo, voz="M1"):
-    ruta_entrada = os.path.join("fanfic", nombre_archivo)
+    ruta_entrada = os.path.join("archivos", nombre_archivo)
     nombre_base = os.path.splitext(nombre_archivo)[0]
     ruta_salida = os.path.join("audio", nombre_base + ".wav")
 
@@ -133,7 +133,7 @@ if __name__ == "__main__":
     archivos = listar_archivos_md()
 
     if not archivos:
-        print("\nCrea un archivo .md dentro de la carpeta 'fanfic/' y ejecuta de nuevo.")
+        print("\nCrea un archivo .md dentro de la carpeta 'archivos/' y ejecuta de nuevo.")
     else:
         for archivo in archivos:
             procesar_capitulo(archivo, voz="M1")

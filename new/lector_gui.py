@@ -66,7 +66,7 @@ class AppLector(tk.Tk):
 
     def __init__(self) -> None:
         super().__init__()
-        self.title("Supertonic Reader — Conversor de capítulos a audio")
+        self.title("Supertonic-AudioBook — Conversor de capítulos a audio")
         self.geometry("660x720")
         self.minsize(580, 640)
 
@@ -97,7 +97,7 @@ class AppLector(tk.Tk):
         fila = ttk.Frame(f_entrada)
         fila.pack(fill="x")
         ttk.Label(fila, text="Carpeta:").pack(side="left")
-        self._var_carpeta_in = tk.StringVar(value=str(_BASE / "fanfic"))
+        self._var_carpeta_in = tk.StringVar(value=str(_BASE / "archivos"))
         ttk.Entry(fila, textvariable=self._var_carpeta_in).pack(
             side="left", fill="x", expand=True, padx=6
         )

@@ -126,7 +126,7 @@ def crear_carpetas_si_no_existen(*carpetas: str) -> None:
     """Crea las carpetas indicadas si no existen.
 
     Args:
-        *carpetas: Nombres de carpeta a crear (ej: 'fanfic', 'audio').
+        *carpetas: Nombres de carpeta a crear (ej: 'archivos', 'audio').
     """
     for nombre in carpetas:
         Path(nombre).mkdir(exist_ok=True)
@@ -164,7 +164,7 @@ def normalizar_formatos(cadena: str) -> List[str]:
     return formatos
 
 
-def listar_archivos_md(carpeta: str = "fanfic") -> List[Path]:
+def listar_archivos_md(carpeta: str = "archivos") -> List[Path]:
     """Busca archivos .md en la carpeta y los ordena numéricamente.
 
     Usa ordenamiento natural: capitulo2.md va antes que capitulo10.md.
@@ -743,19 +743,19 @@ def main() -> None:
     log.info("Formatos de salida: %s", ", ".join(args.formatos))
 
     # Asegurar estructura de carpetas
-    crear_carpetas_si_no_existen("fanfic", "audio")
+    crear_carpetas_si_no_existen("archivos", "audio")
 
     # Determinar qué archivos procesar
     if args.capitulo:
-        ruta = Path("fanfic") / args.capitulo
+        ruta = Path("archivos") / args.capitulo
         if not ruta.exists():
-            log.error("El archivo '%s' no existe en la carpeta 'fanfic/'.", ruta)
+            log.error("El archivo '%s' no existe en la carpeta 'archivos/'.", ruta)
             sys.exit(1)
         archivos = [ruta]
     else:
         archivos = listar_archivos_md()
         if not archivos:
-            log.info("Creá un archivo .md dentro de 'fanfic/' y ejecutá de nuevo.")
+            log.info("Creá un archivo .md dentro de 'archivos/' y ejecutá de nuevo.")
             return
 
     # Inicializar motor TTS (una sola vez para todos los capítulos)
