@@ -1,18 +1,34 @@
-# Supertonic-AudioBook
+<div align="center">
 
-Conversor de capítulos en Markdown a audios con voz sintética, basado en el motor [Supertonic 3](https://huggingface.co/spaces/Supertone/supertonic-3) (TTS local, on-device, sin llamadas a la nube).
+# 🎧 Supertonic-AudioBook
 
-Incluye dos interfaces:
+**La aplicación — código en capas, CLI + GUI.**
 
-- **CLI** — `python main.py --cli`: procesa capítulos desde la terminal.
-- **GUI** — `python main.py` (o `python main.py --gui`): ventana Tkinter con selección de capítulos, formatos, voz y parámetros del TTS, sin necesidad de la terminal.
+Este módulo contiene la versión actual de la app: `main.py` como punto de entrada,
+el código separado en capas (`domain/`, `data/`, `presentation/`) y el spec de PyInstaller.
+
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=1f2937)
+![Windows](https://img.shields.io/badge/Windows-ok-0078D6?style=for-the-badge&logo=windows&logoColor=white&labelColor=1f2937)
+![TTS local](https://img.shields.io/badge/TTS-100%25%20local-22c55e?style=for-the-badge&logo=speakerdeck&logoColor=white&labelColor=1f2937)
+![Licencia](https://img.shields.io/badge/Licencia-MIT-22c55e?style=for-the-badge&logo=github&logoColor=white&labelColor=1f2937)
+
+**[Instalación](#instalación) · [CLI](#uso--cli) · [GUI](#uso--gui) · [Síntesis](#detalles-de-síntesis) · [Empaquetado](#empaquetado-con-pyinstaller)**
+
+---
+
+</div>
+
+Incluye **dos interfaces**:
+
+- 🖥️ **CLI** — `python main.py --cli`: procesa capítulos desde la terminal.
+- 🗔 **GUI** — `python main.py` (o `python main.py --gui`): ventana Tkinter con selección de capítulos, formatos, voz y parámetros del TTS, sin necesidad de la terminal.
 
 ## Características
 
 - Exportación multi-formato **nativa**: `wav`, `flac`, `ogg` y `mp3` (sin ffmpeg).
 - **Natural sorting** de capítulos: `capitulo10.md` va después de `capitulo2.md`.
 - Limpieza automática de sintaxis Markdown (títulos, listas, links, imágenes, bloques de código, etc.).
-- Segmentación de texto optimizada para TTS con soporte de abreviaturas del español (`Dr.`, `Sr.`, `etc.`, ...).
+- Segmentación de texto optimizada para TTS con soporte de abreviaturas del español (`Dr.`, `Sr.`, `etc.`).
 - **Protección de memoria para libros largos**: volcado incremental a disco cuando los fragmentos acumulados superan ~500 MB.
 - Manejo de errores en síntesis: un fragmento fallido no aborta el capítulo.
 - Validación de la voz antes de usarla.
@@ -31,7 +47,7 @@ Incluye dos interfaces:
 - **Tkinter** *(solo GUI)* — incluido en la instalación estándar de Python en Windows.
 - **PyInstaller** *(solo empaquetado)*.
 
-> **Red**: solo se necesita la primera vez, para descargar el modelo. Si existe una carpeta `modelo/` con los assets, la app funciona completamente offline.
+> 💡 **Red**: solo se necesita la primera vez, para descargar el modelo. Si existe una carpeta `modelo/` con los assets, la app funciona completamente offline.
 
 ## Instalación
 
@@ -40,6 +56,8 @@ pip install supertonic numpy soundfile
 pip install tqdm            # opcional: barra de progreso
 pip install pyinstaller     # opcional: para empaquetar el .exe
 ```
+
+---
 
 ## Uso — CLI
 
@@ -58,13 +76,13 @@ python main.py --cli --verbose
 
 | Opción | Descripción | Default |
 |--------|-------------|---------|
-| `--capitulo, -c ARCHIVO` | Procesar solo un capítulo (ej: `capitulo3.md`). Debe existir dentro de `archivos/`. Sin esta opción se procesan todos los `.md` encontrados. | todos |
-| `--voz, -v` | Voz a usar. Voces disponibles: `M1`–`M5`, `F1`–`F5`. | `M1` |
+| `-c, --capitulo ARCHIVO` | Procesar solo un capítulo (ej: `capitulo3.md`). Debe existir dentro de `archivos/`. Sin esta opción se procesan todos los `.md` encontrados. | todos |
+| `-v, --voz VOZ` | Voz a usar. Voces disponibles: `M1`–`M5`, `F1`–`F5`. | `M1` |
 | `--steps` | Pasos de inferencia del TTS. Más pasos = mejor calidad, más lento. | `5` |
 | `--speed` | Velocidad de habla (`1.0` = normal). | `1.1` |
-| `--formato, -f FORMATOS` | Formato(s) de salida separados por coma. Válidos: `wav, flac, ogg, mp3`. | `wav` |
-| `--verbose, -V` | Modo verbose (logging DEBUG). | — |
-| `--quiet, -q` | Modo silencioso (solo warnings y errores). | — |
+| `-f, --formato FORMATOS` | Formato(s) de salida separados por coma. Válidos: `wav, flac, ogg, mp3`. | `wav` |
+| `-V, --verbose` | Modo verbose (logging DEBUG). | — |
+| `-q, --quiet` | Modo silencioso (solo warnings y errores). | — |
 
 ### Ejemplos
 
@@ -104,6 +122,8 @@ SupertonicAudioBook.exe --self-test
 
 Escribe `audio/_self_test.wav`, imprime `SELF-TEST OK` (exit code `0`) o `SELF-TEST FAIL` (exit code `1`).
 
+---
+
 ## Formatos de salida
 
 `wav`, `flac`, `ogg` y `mp3` se escriben directamente con `soundfile` (subtipos `PCM_16`, `PCM_16`, `VORBIS` y `MPEG_LAYER_III`), sin necesidad de ffmpeg. Se pueden pedir varios a la vez separados por coma.
@@ -128,6 +148,8 @@ En la CLI las carpetas son relativas al directorio de trabajo. En la GUI se pued
 - **Silencio entre segmentos**: 0.6 s.
 - **Frecuencia de muestreo**: 44100 Hz.
 - **Memoria**: si los fragmentos acumulados superan ~500 MB (libros muy largos), se vuelcan a disco de forma incremental — el capítulo nunca se pierde por falta de RAM.
+
+---
 
 ## Empaquetado con PyInstaller
 

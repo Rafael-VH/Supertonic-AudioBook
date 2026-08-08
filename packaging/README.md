@@ -1,8 +1,24 @@
-# Supertonic-AudioBook — Instalador portable
+<div align="center">
+
+# 📦 Supertonic-AudioBook — Instaladores portables
+
+**Generación de instaladores de un solo archivo (one-file) para usuario final.**
+
+Scripts y specs que empaquetan la app compilada (`app/`) en un `.exe` portable que funciona en cualquier PC con Windows, sin Python ni dependencias.
+
+![PyInstaller](https://img.shields.io/badge/PyInstaller-one--file-cccccc?style=for-the-badge&logo=python&logoColor=white&labelColor=1f2937)
+![Windows](https://img.shields.io/badge/Windows-ok-0078D6?style=for-the-badge&logo=windows&logoColor=white&labelColor=1f2937)
+![2 variantes](https://img.shields.io/badge/variantes-2-22c55e?style=for-the-badge&logo=speakerdeck&logoColor=white&labelColor=1f2937)
+
+**[Variantes](#variantes) · [Cómo funciona](#cómo-funciona) · [Construir](#cómo-construir-el-instalador) · [Lite](#instalador-lite-sin-modelo) · [Uso](#uso-usuario-final)**
+
+---
+
+</div>
 
 Un único `.exe` que, al ejecutarse en cualquier PC con Windows, extrae la aplicación completa (ejecutable + dependencias + modelo TTS) en una carpeta junto a sí mismo y la lanza. No requiere instalar Python ni nada más: todo viaja empaquetado dentro del instalador.
 
-Hay **dos variantes** del instalador:
+## Variantes
 
 | Instalador | Tamaño aprox. | Modelo TTS |
 |---|---|---|
@@ -13,7 +29,7 @@ Ambas se generan con un solo comando. Los detalles de la variante Lite están en
 
 ## Qué es
 
-`instalador_portable.py` es un instalador de un solo archivo. Se compila con PyInstaller en modo one-file y, al ejecutarlo, deja una instalación portable de **Supertonic-AudioBook** en la carpeta del propio instalador, lista para usarse desde ahí.
+`build_portables.py` prepara el staging y compila **ambos** instaladores con PyInstaller en modo one-file. Al ejecutarlos, dejan una instalación portable de **Supertonic-AudioBook** en la carpeta del propio instalador, lista para usarse desde ahí.
 
 El resultado es `SupertonicAudioBook-Portable.exe`, un instalador sin consola (`console=False`) pensado para el usuario final.
 
@@ -38,6 +54,8 @@ Si se ejecuta el script como Python normal (`python instalador_portable.py`), no
 ### Para el usuario final
 
 - Cualquier PC con Windows. No necesita Python ni ninguna dependencia adicional.
+
+---
 
 ## Cómo construir el instalador
 
@@ -76,6 +94,8 @@ dist\SupertonicAudioBook-Portable-Lite.exe
 | `pyinstaller SupertonicAudioBook-Portable.spec` | Solo el instalador completo (el dist debe existir) |
 | `pyinstaller SupertonicAudioBook-Portable-Lite.spec` | Solo el instalador Lite (el staging debe existir) |
 
+---
+
 ## Instalador Lite (sin modelo)
 
 `SupertonicAudioBook-Portable-Lite.exe` trae la misma aplicación pero **sin el modelo TTS**. El modelo pesa ~385 MB, por eso este instalador es mucho más chico (~60 MB).
@@ -95,7 +115,7 @@ dist\SupertonicAudioBook-Portable-Lite.exe
 
 1. Copiá `SupertonicAudioBook-Portable.exe` a la carpeta donde querés dejar la instalación portable.
 2. Ejecutalo con doble clic.
-    - **Primera ejecución**: se abre la ventana "Supertonic-AudioBook — Instalador" con una barra de progreso. Copia la aplicación completa a la subcarpeta `SupertonicAudioBook` (junto al instalador) y al terminar lanza la app.
+   - **Primera ejecución**: se abre la ventana "Supertonic-AudioBook — Instalador" con una barra de progreso. Copia la aplicación completa a la subcarpeta `SupertonicAudioBook` (junto al instalador) y al terminar lanza la app.
    - **Ejecuciones siguientes**: si la instalación ya existe y está actualizada, lanza la app directamente, sin mostrar ventana.
 3. La app queda instalada de forma permanente en esa carpeta: se puede ejecutar desde ahí sin volver a correr el instalador.
 

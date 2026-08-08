@@ -1,6 +1,13 @@
-# legacy/ — Lector de Fanfiction (versión original, legacy)
+<div align="center">
 
-> **DEPRECADO**: esta carpeta contiene la versión ORIGINAL del conversor de Markdown a audio con el SDK Supertonic TTS. Fue reemplazada por la versión actual en `../app/`. **No empieces aquí**: usa `python ../app/main.py --cli` (CLI) o `python ../app/main.py` (interfaz gráfica).
+# 🗂️ legacy/ — Versión original (deprecada)
+
+**Lector de Fanfiction — primera versión del conversor Markdown → audio.**
+
+> [!WARNING]
+> **DEPRECADO**: esta carpeta contiene la versión ORIGINAL del conversor de Markdown a audio con el SDK Supertonic TTS. Fue reemplazada por la versión actual en [`../app/`](../app/README.md). **No empieces aquí**: usa `python ../app/main.py --cli` (CLI) o `python ../app/main.py` (interfaz gráfica).
+
+</div>
 
 ## Qué es
 
