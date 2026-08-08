@@ -1,7 +1,7 @@
 # Builds (PyInstaller)
-new/dist/
-portable/dist/
-portable/staging_lite/
+app/dist/
+packaging/dist/
+packaging/staging_lite/
 build/
 
 # Python

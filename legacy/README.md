@@ -1,6 +1,6 @@
-# old/ — Lector de Fanfiction (versión original, legacy)
+# legacy/ — Lector de Fanfiction (versión original, legacy)
 
-> **DEPRECADO**: esta carpeta contiene la versión ORIGINAL del conversor de Markdown a audio con el SDK Supertonic TTS. Fue reemplazada por la versión mejorada en `../new/`. **No empieces aquí**: usa `new/lector_fanfiction_mejorado.py` (CLI mejorada) o `new/lector_gui.py` (interfaz gráfica).
+> **DEPRECADO**: esta carpeta contiene la versión ORIGINAL del conversor de Markdown a audio con el SDK Supertonic TTS. Fue reemplazada por la versión actual en `../app/`. **No empieces aquí**: usa `python ../app/main.py --cli` (CLI) o `python ../app/main.py` (interfaz gráfica).
 
 ## Qué es
 
@@ -58,7 +58,7 @@ Si `archivos/` está vacía o no tiene archivos `.md`, el script avisa y termina
 
 4. Encuentra el audio resultante en `audio/capitulo_01.wav`.
 
-## Limitaciones (razones para migrar a `../new/`)
+## Limitaciones (razones para migrar a `../app/`)
 
 - Solo exporta WAV.
 - Voz fija `M1`, sin selección por capítulo.

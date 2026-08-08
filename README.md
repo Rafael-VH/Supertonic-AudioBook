@@ -4,7 +4,7 @@ Conversor de documentos en Markdown a audios con voz sintética, totalmente loca
 
 ```bash
 pip install supertonic numpy soundfile
-python new/lector_fanfiction_mejorado.py
+python app/main.py --cli
 ```
 
 Colocá tus archivos `.md` en `archivos/` y los audios aparecerán en `audio/`.
@@ -13,7 +13,7 @@ Colocá tus archivos `.md` en `archivos/` y los audios aparecerán en `audio/`.
 
 1. **Instalá** las dependencias: `pip install supertonic numpy soundfile` (Python 3.10+).
 2. **Poné tus archivos** en `archivos/` (Markdown, un archivo por capítulo o sección).
-3. **Ejecutá** la CLI desde la raíz: `python new/lector_fanfiction_mejorado.py`.
+3. **Ejecutá** la CLI: `python app/main.py --cli`.
 4. **Escuchá** los resultados en `audio/` (por defecto `capituloN.wav`).
 
 > La primera ejecución descarga el modelo (~1 vez, requiere red). Si copiás una carpeta `modelo/` con los assets junto a los scripts, funciona 100% offline.
@@ -33,9 +33,9 @@ Colocá tus archivos `.md` en `archivos/` y los audios aparecerán en `audio/`.
 
 | Carpeta | Qué contiene | Documentación |
 |---------|--------------|---------------|
-| `new/` | **Versión actual**: CLI (`lector_fanfiction_mejorado.py`), GUI (`lector_gui.py`) y spec PyInstaller. | [new/README.md](new/README.md) |
-| `portable/` | **Instalador portable**: un `.exe` que extrae la app completa junto a sí mismo y la lanza. | [portable/README.md](portable/README.md) |
-| `old/` | **Versión original (legacy)**: solo WAV, voz fija. Deprecada. | [old/README.md](old/README.md) |
+| `app/` | **Versión actual**: código en capas (`domain/`, `data/`, `presentation/`), `main.py` como punto de entrada y spec PyInstaller. | [app/README.md](app/README.md) |
+| `packaging/` | **Instalador portable**: un `.exe` que extrae la app completa junto a sí mismo y la lanza. | [packaging/README.md](packaging/README.md) |
+| `legacy/` | **Versión original (legacy)**: solo WAV, voz fija. Deprecada. | [legacy/README.md](legacy/README.md) |
 
 ## Uso
 
@@ -43,16 +43,16 @@ Colocá tus archivos `.md` en `archivos/` y los audios aparecerán en `audio/`.
 
 ```bash
 # Todos los capítulos, formato por defecto (wav)
-python new/lector_fanfiction_mejorado.py
+python app/main.py --cli
 
 # Un solo capítulo, voz femenina, mejor calidad, dos formatos
-python new/lector_fanfiction_mejorado.py -c capitulo3.md -v F1 --steps 12 -f wav,mp3
+python app/main.py --cli -c capitulo3.md -v F1 --steps 12 -f wav,mp3
 
 # Toda la novela en mp3, más rápido
-python new/lector_fanfiction_mejorado.py -f mp3 --speed 1.3
+python app/main.py --cli -f mp3 --speed 1.3
 
 # Log detallado
-python new/lector_fanfiction_mejorado.py --verbose
+python app/main.py --cli --verbose
 ```
 
 | Opción | Descripción | Default |
@@ -68,7 +68,7 @@ python new/lector_fanfiction_mejorado.py --verbose
 ### GUI
 
 ```bash
-python new/lector_gui.py
+python app/main.py
 ```
 
 Ventana Tkinter con lista de capítulos (`Todo` / `Nada` / `Refrescar`, multiselección con `Ctrl+clic`), carpetas de entrada/salida, formatos, voz, sliders de pasos (5–12) y velocidad (0.7–2.0), barra de progreso y panel de log. Se procesa en un hilo aparte (la interfaz no se congela) y `Cancelar` exporta lo generado hasta el momento.
@@ -76,14 +76,14 @@ Ventana Tkinter con lista de capítulos (`Todo` / `Nada` / `Refrescar`, multisel
 Self-test del motor sin abrir la ventana:
 
 ```bash
-python new/lector_gui.py --self-test
+python app/main.py --self-test
 ```
 
 Escribe `audio/_self_test.wav` y termina con `SELF-TEST OK` (exit 0) o `SELF-TEST FAIL` (exit 1).
 
 ### Portable
 
-Para distribuir al usuario final: los instaladores portables de `portable/`. Al ejecutarse en cualquier PC con Windows extraen la app (ejecutable + dependencias + modelo) a la carpeta del propio instalador y la lanzan. No requieren Python. Más detalle en [portable/README.md](portable/README.md).
+Para distribuir al usuario final: los instaladores portables de `packaging/`. Al ejecutarse en cualquier PC con Windows extraen la app (ejecutable + dependencias + modelo) a la carpeta del propio instalador y la lanzan. No requieren Python. Más detalle en [packaging/README.md](packaging/README.md).
 
 Hay dos variantes:
 
@@ -102,22 +102,22 @@ En la CLI las carpetas son relativas al directorio de trabajo; en la GUI se elig
 
 ## Empaquetado
 
-La app se compila a un `.exe` (one-folder, sin consola) con PyInstaller desde `new/`:
+La app se compila a un `.exe` (one-folder, sin consola) con PyInstaller desde `app/`:
 
 ```bash
 pip install pyinstaller
-pyinstaller new/SupertonicAudioBook.spec
+pyinstaller app/SupertonicAudioBook.spec
 ```
 
-Produce `new/dist/SupertonicAudioBook/SupertonicAudioBook.exe`. Para distribuir sin conexión, copiá `modelo/` junto al `.exe` y verificá con `SupertonicAudioBook.exe --self-test`.
+Produce `app/dist/SupertonicAudioBook/SupertonicAudioBook.exe`. Para distribuir sin conexión, copiá `modelo/` junto al `.exe` y verificá con `SupertonicAudioBook.exe --self-test`.
 
 Los instaladores portables se construyen contra la app ya compilada con un solo comando:
 
 ```bash
-python portable/build_portables.py
+python packaging/build_portables.py
 ```
 
-Produce `portable/dist/SupertonicAudioBook-Portable.exe` (completa, con modelo) y `portable/dist/SupertonicAudioBook-Portable-Lite.exe` (lite, sin modelo). Para la variante completa, copiá `modelo/` en `new/dist/SupertonicAudioBook` antes de construir.
+Produce `packaging/dist/SupertonicAudioBook-Portable.exe` (completa, con modelo) y `packaging/dist/SupertonicAudioBook-Portable-Lite.exe` (lite, sin modelo). Para la variante completa, copiá `modelo/` en `app/dist/SupertonicAudioBook` antes de construir.
 
 ## Créditos
 

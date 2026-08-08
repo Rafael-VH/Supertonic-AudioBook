@@ -33,7 +33,7 @@ Si se ejecuta el script como Python normal (`python instalador_portable.py`), no
 ### Para construir el instalador
 
 - Windows y Python 3 con PyInstaller instalado (`pip install pyinstaller`).
-- La aplicación **Supertonic-AudioBook ya compilada** en la ruta declarada en el `.spec`: `C:\Users\rafae\Music\Supertonic\new\dist\SupertonicAudioBook`. Esa carpeta debe contener `SupertonicAudioBook.exe`, sus dependencias y el modelo TTS. Si la app se compila en otra ruta, ajustá `datas` en `SupertonicAudioBook-Portable.spec`.
+- La aplicación **Supertonic-AudioBook ya compilada** en la ruta declarada en el `.spec`: `C:\Users\rafae\Music\Supertonic\app\dist\SupertonicAudioBook`. Esa carpeta debe contener `SupertonicAudioBook.exe`, sus dependencias y el modelo TTS. Si la app se compila en otra ruta, ajustá `datas` en `SupertonicAudioBook-Portable.spec`.
 
 ### Para el usuario final
 
@@ -41,7 +41,7 @@ Si se ejecuta el script como Python normal (`python instalador_portable.py`), no
 
 ## Cómo construir el instalador
 
-El script `build_portables.py` prepara el staging sin modelo y genera **ambos** instaladores. No compila la aplicación: esa es responsabilidad de `new/` (ver `new/README.md`); este script solo lee la app ya compilada.
+El script `build_portables.py` prepara el staging sin modelo y genera **ambos** instaladores. No compila la aplicación: esa es responsabilidad de `app/` (ver `app/README.md`); este script solo lee la app ya compilada.
 
 ```bash
 python build_portables.py
@@ -50,13 +50,13 @@ python build_portables.py
 Requisitos previos:
 
 - Windows y Python 3 con PyInstaller instalado (`pip install pyinstaller`).
-- La aplicación compilada en `new/dist/SupertonicAudioBook` (desde `new/` con `new\SupertonicAudioBook.spec`).
-- Para la variante completa, el modelo TTS en `new/dist/SupertonicAudioBook\modelo`. Podés descargarlo corriendo la app una vez (`SupertonicAudioBook.exe --self-test`) o copiándolo al dist. Para la variante Lite no hace falta.
+- La aplicación compilada en `app/dist/SupertonicAudioBook` (desde `app/` con `app\SupertonicAudioBook.spec`).
+- Para la variante completa, el modelo TTS en `app/dist/SupertonicAudioBook\modelo`. Podés descargarlo corriendo la app una vez (`SupertonicAudioBook.exe --self-test`) o copiándolo al dist. Para la variante Lite no hace falta.
 
 Qué hace cada paso:
 
-1. **Verifica** que la app esté compilada en `new/dist/SupertonicAudioBook`. Si no, te avisa y te manda a `new/`; no compila nada por su cuenta.
-2. **Prepara el staging Lite**: copia `new/dist/SupertonicAudioBook` a `portable/staging_lite/SupertonicAudioBook` **sin** la carpeta `modelo`.
+1. **Verifica** que la app esté compilada en `app/dist/SupertonicAudioBook`. Si no, te avisa y te manda a `app/`; no compila nada por su cuenta.
+2. **Prepara el staging Lite**: copia `app/dist/SupertonicAudioBook` a `packaging/staging_lite/SupertonicAudioBook` **sin** la carpeta `modelo`.
 3. **Compila el instalador completo** (`SupertonicAudioBook-Portable.spec`): empaqueta el dist completo, modelo incluido.
 4. **Compila el instalador Lite** (`SupertonicAudioBook-Portable-Lite.spec`): empaqueta el staging sin modelo. El `.spec` lee la ruta desde la variable `SUPERTONIC_APP_DIST`, que el script define automáticamente.
 

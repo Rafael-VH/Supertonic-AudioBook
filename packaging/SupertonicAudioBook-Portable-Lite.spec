@@ -10,7 +10,7 @@ import os
 
 _APP_DIST = os.environ.get(
     "SUPERTONIC_APP_DIST",
-    r"C:\Users\rafae\Music\Supertonic\portable\staging_lite\SupertonicAudioBook",
+    r"C:\Users\rafae\Music\Supertonic\packaging\staging_lite\SupertonicAudioBook",
 )
 
 a = Analysis(

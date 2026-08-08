@@ -1,12 +1,12 @@
 """
 build_portables.py — Genera los dos instaladores portables de Supertonic-AudioBook.
 
-Este script trabaja SOLO dentro de portable/: prepara el staging sin modelo y
-compila los instaladores. NO compila la app (eso vive en new/ y es
-responsabilidad de new/SupertonicAudioBook.spec); solo la lee desde
-new/dist/SupertonicAudioBook.
+Este script trabaja SOLO dentro de packaging/: prepara el staging sin modelo y
+compila los instaladores. NO compila la app (eso vive en app/ y es
+responsabilidad de app/SupertonicAudioBook.spec); solo la lee desde
+app/dist/SupertonicAudioBook.
 
-1. Verifica que la app ya esté compilada en new/dist/SupertonicAudioBook.
+1. Verifica que la app ya esté compilada en app/dist/SupertonicAudioBook.
 2. Prepara un staging del dist SIN la carpeta modelo/ (para la variante Lite).
 3. Compila el instalador completo  (SupertonicAudioBook-Portable.exe, ~417 MB).
 4. Compila el instalador Lite       (SupertonicAudioBook-Portable-Lite.exe, ~40 MB).
@@ -27,9 +27,9 @@ import sys
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
-APP_DIST = RAIZ / "new" / "dist" / "SupertonicAudioBook"
+APP_DIST = RAIZ / "app" / "dist" / "SupertonicAudioBook"
 APP_EXE = APP_DIST / "SupertonicAudioBook.exe"
-STAGING_LITE = RAIZ / "portable" / "staging_lite" / "SupertonicAudioBook"
+STAGING_LITE = RAIZ / "packaging" / "staging_lite" / "SupertonicAudioBook"
 
 MODELO = APP_DIST / "modelo"
 
@@ -43,8 +43,8 @@ def verificar_app() -> None:
     if not APP_EXE.exists():
         raise SystemExit(
             f"No está compilada la app: {APP_EXE}\n"
-            "Compilala primero desde new/ (ver new/README.md):\n"
-            "  pyinstaller new/SupertonicAudioBook.spec\n"
+            "Compilala primero desde app/ (ver app/README.md):\n"
+            "  pyinstaller app/SupertonicAudioBook.spec\n"
             "Este script solo genera los instaladores, no compila la app."
         )
     print(f"[build] App compilada: {APP_EXE}")
@@ -67,14 +67,14 @@ def preparar_staging_lite() -> None:
 def compilar_instalador_completo() -> None:
     if not MODELO.is_dir():
         raise SystemExit(
-            "Falta el modelo TTS en new/dist/SupertonicAudioBook/modelo.\n"
+            "Falta el modelo TTS en app/dist/SupertonicAudioBook/modelo.\n"
             "El instalador COMPLETO lo necesita. Corré la app una vez para que "
             "lo descargue, o usá --solo-lite para generar solo el instalador Lite."
         )
     print("[build] Compilando instalador COMPLETO (con modelo)...")
     _ejecutar(
         [sys.executable, "-m", "PyInstaller", "SupertonicAudioBook-Portable.spec", "--noconfirm"],
-        RAIZ / "portable",
+        RAIZ / "packaging",
     )
 
 
@@ -83,7 +83,7 @@ def compilar_instalador_lite() -> None:
     env = dict(os.environ, SUPERTONIC_APP_DIST=str(STAGING_LITE))
     _ejecutar(
         [sys.executable, "-m", "PyInstaller", "SupertonicAudioBook-Portable-Lite.spec", "--noconfirm"],
-        RAIZ / "portable",
+        RAIZ / "packaging",
     )
 
 
@@ -106,10 +106,10 @@ def main() -> None:
 
     print("\n[build] Listo. Instaladores generados:")
     if args.solo_lite:
-        print(f"  {RAIZ / 'portable' / 'dist' / 'SupertonicAudioBook-Portable-Lite.exe'}")
+        print(f"  {RAIZ / 'packaging' / 'dist' / 'SupertonicAudioBook-Portable-Lite.exe'}")
     else:
-        print(f"  {RAIZ / 'portable' / 'dist' / 'SupertonicAudioBook-Portable.exe'}")
-        print(f"  {RAIZ / 'portable' / 'dist' / 'SupertonicAudioBook-Portable-Lite.exe'}")
+        print(f"  {RAIZ / 'packaging' / 'dist' / 'SupertonicAudioBook-Portable.exe'}")
+        print(f"  {RAIZ / 'packaging' / 'dist' / 'SupertonicAudioBook-Portable-Lite.exe'}")
 
 
 if __name__ == "__main__":

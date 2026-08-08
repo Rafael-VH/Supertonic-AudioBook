@@ -1,17 +1,8 @@
-"""
-lector_gui.py — Interfaz gráfica (Tkinter) para el conversor de capítulos.
+"""Interfaz gráfica (Tkinter) para el conversor de capítulos (capa de presentación).
 
-Envuelve la lógica de ``lector_fanfiction_mejorado.py`` en una ventana
-portable: selección de capítulos, formatos de salida, voz y parámetros
-del TTS, sin necesidad de la terminal.
-
-Portabilidad: al estar empaquetado con PyInstaller, el modelo puede
-vivir en una carpeta ``modelo/`` junto al ejecutable (funciona offline).
-Si no existe, se descarga automáticamente al primer uso (requiere red).
-
-Uso:
-    python lector_gui.py              # lanzar la interfaz
-    python lector_gui.py --self-test  # verificar motor + síntesis sin GUI
+Recibe las dependencias ya inyectadas desde la raíz de composición
+(``main.py``): la fábrica de use case y el repositorio. No importa
+``data/`` ni instancia implementaciones concretas.
 """
 
 import logging
@@ -22,25 +13,13 @@ import threading
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, scrolledtext, ttk
+from typing import Callable, List
 
-_FROZEN = getattr(sys, "frozen", False)
-
-if _FROZEN:
-    _BASE = Path(sys.executable).resolve().parent
-    os.environ.setdefault("SUPERTONIC_CACHE_DIR", str(_BASE / "modelo"))
-else:
-    _BASE = Path(__file__).resolve().parent
-
-from lector_fanfiction_mejorado import (  # noqa: E402  (después de env)
-    DEFAULT_SPEED,
-    DEFAULT_TTS_STEPS,
-    DEFAULT_VOICE,
-    FORMATOS_NATIVOS,
-    MotorTTS,
-    crear_carpetas_si_no_existen,
-    listar_archivos_md,
-    procesar_capitulo,
-)
+from domain.entities.capitulo import Capitulo
+from domain.repositories.motor_tts import DEFAULT_SPEED, DEFAULT_TTS_STEPS, DEFAULT_VOICE
+from domain.repositories.repositorio_archivos import RepositorioArchivos
+from domain.use_cases.formato import FORMATOS_NATIVOS
+from domain.use_cases.procesar_capitulo import ProcesarCapitulo
 
 VOCES: tuple = ("M1", "M2", "M3", "M4", "M5", "F1", "F2", "F3", "F4", "F5")
 """Voces integradas del modelo supertonic-3 (M1-M5, F1-F5)."""
@@ -64,8 +43,23 @@ class _LogHaciaCola(logging.Handler):
 class AppLector(tk.Tk):
     """Ventana principal del conversor."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        fabrica_use_case: Callable[[str], ProcesarCapitulo],
+        repositorio: RepositorioArchivos,
+        carpeta_base: Path,
+    ) -> None:
+        """Args:
+            fabrica_use_case: Crea ``ProcesarCapitulo`` para una voz dada.
+            repositorio: Acceso a los capítulos en disco (inyectado).
+            carpeta_base: Carpeta base de la app (modelo/, archivos/, audio/).
+        """
         super().__init__()
+        self._fabrica_use_case = fabrica_use_case
+        self._repositorio = repositorio
+        self._carpeta_base = carpeta_base
+
         self.title("Supertonic-AudioBook — Conversor de capítulos a audio")
         self.geometry("660x720")
         self.minsize(580, 640)
@@ -74,8 +68,8 @@ class AppLector(tk.Tk):
         self._cancelar = threading.Event()
         self._hilo: threading.Thread | None = None
         self._en_ejecucion = False
-        self._archivos: list[Path] = []
-        self._seleccion: list[Path] = []
+        self._archivos: List[Path] = []
+        self._seleccion: List[Path] = []
 
         self._handler_log = _LogHaciaCola(self._cola)
         logging.getLogger().addHandler(self._handler_log)
@@ -97,7 +91,7 @@ class AppLector(tk.Tk):
         fila = ttk.Frame(f_entrada)
         fila.pack(fill="x")
         ttk.Label(fila, text="Carpeta:").pack(side="left")
-        self._var_carpeta_in = tk.StringVar(value=str(_BASE / "archivos"))
+        self._var_carpeta_in = tk.StringVar(value=str(self._carpeta_base / "archivos"))
         ttk.Entry(fila, textvariable=self._var_carpeta_in).pack(
             side="left", fill="x", expand=True, padx=6
         )
@@ -132,7 +126,7 @@ class AppLector(tk.Tk):
         fila = ttk.Frame(f_salida)
         fila.pack(fill="x")
         ttk.Label(fila, text="Carpeta:").pack(side="left")
-        self._var_carpeta_out = tk.StringVar(value=str(_BASE / "audio"))
+        self._var_carpeta_out = tk.StringVar(value=str(self._carpeta_base / "audio"))
         ttk.Entry(fila, textvariable=self._var_carpeta_out).pack(
             side="left", fill="x", expand=True, padx=6
         )
@@ -229,7 +223,7 @@ class AppLector(tk.Tk):
             self._var_carpeta_out.set(carpeta)
 
     def _refrescar_archivos(self) -> None:
-        self._archivos = listar_archivos_md(self._var_carpeta_in.get())
+        self._archivos = self._repositorio.listar_archivos_md(self._var_carpeta_in.get())
         self.lista.delete(0, "end")
         for archivo in self._archivos:
             self.lista.insert("end", archivo.name)
@@ -281,18 +275,17 @@ class AppLector(tk.Tk):
             steps = int(round(self._var_steps.get()))
             speed = float(self._var_speed.get())
             salida = Path(self._var_carpeta_out.get())
-            crear_carpetas_si_no_existen(str(salida))
+            self._repositorio.crear_carpetas_si_no_existen(str(salida))
 
-            motor = MotorTTS(voz=voz)
+            use_case = self._fabrica_use_case(voz)
             total_caps = len(self._seleccion)
             for i, ruta in enumerate(self._seleccion, 1):
                 if self._cancelar.is_set():
                     break
                 self._cola.put(("capitulo", i, total_caps, ruta.name))
-                procesar_capitulo(
-                    ruta,
+                use_case.procesar(
+                    Capitulo(ruta),
                     salida / ruta.stem,
-                    motor,
                     steps=steps,
                     speed=speed,
                     formatos=formatos,
@@ -358,44 +351,3 @@ class AppLector(tk.Tk):
         self._en_ejecucion = activo
         self._btn_procesar.config(state="disabled" if activo else "normal")
         self._btn_cancelar.config(state="normal" if activo else "disabled")
-
-
-def _self_test() -> int:
-    """Verifica motor + síntesis sin abrir la ventana. Para probar el .exe."""
-    import numpy as np
-
-    from lector_fanfiction_mejorado import SAMPLE_RATE, _escribir_audio
-
-    try:
-        motor = MotorTTS(voz=DEFAULT_VOICE)
-        wav = motor.sintetizar(
-            "Prueba de síntesis del motor Supertonic.",
-            steps=DEFAULT_TTS_STEPS,
-            speed=DEFAULT_SPEED,
-        )
-        if wav.size == 0:
-            print("SELF-TEST FAIL: no se generó audio.")
-            return 1
-        salida = _BASE / "audio" / "_self_test.wav"
-        salida.parent.mkdir(exist_ok=True)
-        _escribir_audio([wav], salida, "wav")
-        duracion = wav.size / SAMPLE_RATE
-        print(
-            f"SELF-TEST OK voz={DEFAULT_VOICE} muestras={wav.size} "
-            f"duracion={duracion:.1f}s salida={salida}"
-        )
-        return 0
-    except Exception as exc:
-        print(f"SELF-TEST FAIL: {exc}")
-        return 1
-
-
-def main() -> None:
-    if "--self-test" in sys.argv:
-        sys.exit(_self_test())
-    app = AppLector()
-    app.mainloop()
-
-
-if __name__ == "__main__":
-    main()

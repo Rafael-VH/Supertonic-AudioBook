@@ -4,8 +4,8 @@ Conversor de capítulos en Markdown a audios con voz sintética, basado en el mo
 
 Incluye dos interfaces:
 
-- **CLI** — `lector_fanfiction_mejorado.py`: procesa capítulos desde la terminal.
-- **GUI** — `lector_gui.py`: ventana Tkinter con selección de capítulos, formatos, voz y parámetros del TTS, sin necesidad de la terminal.
+- **CLI** — `python main.py --cli`: procesa capítulos desde la terminal.
+- **GUI** — `python main.py` (o `python main.py --gui`): ventana Tkinter con selección de capítulos, formatos, voz y parámetros del TTS, sin necesidad de la terminal.
 
 ## Características
 
@@ -19,6 +19,7 @@ Incluye dos interfaces:
 - Barra de progreso con `tqdm` (opcional).
 - Logging granular (`--verbose` / `--quiet`).
 - En la GUI: cancelación en cualquier momento (exporta lo generado hasta entonces) y `--self-test` para verificar el motor sin abrir la ventana.
+- **Arquitectura en capas**: `domain/` (reglas puras e interfaces), `data/` (implementaciones del motor, archivos y audio) y `presentation/` (CLI, GUI y self-test). `main.py` es la raíz de composición que las conecta.
 
 ## Requisitos
 
@@ -45,12 +46,12 @@ pip install pyinstaller     # opcional: para empaquetar el .exe
 Desde la carpeta del proyecto, con los capítulos `.md` dentro de `archivos/`:
 
 ```bash
-python lector_fanfiction_mejorado.py
-python lector_fanfiction_mejorado.py --capitulo capitulo3.md
-python lector_fanfiction_mejorado.py --voz F1 --steps 10
-python lector_fanfiction_mejorado.py --formato mp3
-python lector_fanfiction_mejorado.py --formato wav,mp3,flac
-python lector_fanfiction_mejorado.py --verbose
+python main.py --cli
+python main.py --cli --capitulo capitulo3.md
+python main.py --cli --voz F1 --steps 10
+python main.py --cli --formato mp3
+python main.py --cli --formato wav,mp3,flac
+python main.py --cli --verbose
 ```
 
 ### Opciones
@@ -69,16 +70,16 @@ python lector_fanfiction_mejorado.py --verbose
 
 ```bash
 # Un solo capítulo, voz femenina, mejor calidad, dos formatos
-python lector_fanfiction_mejorado.py -c capitulo3.md -v F1 --steps 12 -f wav,mp3
+python main.py --cli -c capitulo3.md -v F1 --steps 12 -f wav,mp3
 
 # Toda la novela en mp3, más rápido
-python lector_fanfiction_mejorado.py -f mp3 --speed 1.3
+python main.py --cli -f mp3 --speed 1.3
 ```
 
 ## Uso — GUI
 
 ```bash
-python lector_gui.py
+python main.py
 ```
 
 La ventana permite:
@@ -97,7 +98,7 @@ La ventana permite:
 Verifica el motor y una síntesis real sin abrir la ventana. Pensado para probar el ejecutable empaquetado:
 
 ```bash
-python lector_gui.py --self-test
+python main.py --self-test
 SupertonicAudioBook.exe --self-test
 ```
 
@@ -130,7 +131,7 @@ En la CLI las carpetas son relativas al directorio de trabajo. En la GUI se pued
 
 ## Empaquetado con PyInstaller
 
-El proyecto incluye `SupertonicAudioBook.spec`, que genera una build **one-folder** (ventana, sin consola) a partir de `lector_gui.py`:
+El proyecto incluye `SupertonicAudioBook.spec`, que genera una build **one-folder** (ventana, sin consola) a partir de `main.py`:
 
 ```bash
 pyinstaller SupertonicAudioBook.spec

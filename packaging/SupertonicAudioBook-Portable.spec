@@ -5,7 +5,7 @@ a = Analysis(
     ['instalador_portable.py'],
     pathex=[],
     binaries=[],
-    datas=[('C:\\Users\\rafae\\Music\\Supertonic\\new\\dist\\SupertonicAudioBook', 'SupertonicAudioBook')],
+    datas=[('C:\\Users\\rafae\\Music\\Supertonic\\app\\dist\\SupertonicAudioBook', 'SupertonicAudioBook')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
