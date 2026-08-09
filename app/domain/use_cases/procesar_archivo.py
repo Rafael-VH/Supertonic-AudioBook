@@ -10,7 +10,7 @@ import logging
 import os
 import tempfile
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Tuple
 
 import numpy as np
 
@@ -74,6 +74,14 @@ class ProcesarArchivo:
             on_progreso: Callback ``(procesados, total)`` por cada segmento.
             debe_detenerse: Callback que, si devuelve ``True``, aborta la
                 síntesis entre segmentos y exporta lo generado hasta ahora.
+
+        Nota: cada salida se publica por separado y de forma atómica
+        (``os.replace``), y solo después de generarla por completo. Si la
+        corrida se cancela o falla durante la síntesis, el output previo de
+        cada formato queda intacto. En la fase de publicación el WAV va
+        último: si falla un formato no-WAV (ej: archivo abierto en otra app),
+        el WAV previo no se reemplaza, aunque los formatos ya publicados sí
+        quedaron actualizados.
         """
         log.info("=" * 50)
         log.info("  Procesando: %s", archivo.nombre)
@@ -96,15 +104,21 @@ class ProcesarArchivo:
         total = len(segmentos)
         log.info("  → %d segmento(s) para procesar.", total)
 
-        # WAV de trabajo: es el destino final si 'wav' está pedido; si no, un
-        # temporal que sirve de fuente intermedia y se borra al terminar.
-        usando_wav = "wav" in formatos
-        if usando_wav:
-            ruta_wav_trabajo = Path(str(ruta_base) + ".wav")
-        else:
-            fd, tmp = tempfile.mkstemp(suffix=".wav", dir=str(ruta_base.parent))
-            os.close(fd)
-            ruta_wav_trabajo = Path(tmp)
+        # Formatos normalizados sin duplicados: si llegara repetido, el segundo
+        # os.replace fallaría publicando dos veces el mismo temporal.
+        formatos = list(dict.fromkeys(formatos))
+
+        # El WAV de trabajo es SIEMPRE un temporal: nada se escribe sobre la
+        # ruta final hasta que la corrida terminó con éxito. Así, si se cancela
+        # o falla, el output previo queda intacto; y como wav_append NO
+        # sobrescribe, un WAV viejo en la ruta final nunca se mezcla con audio
+        # nuevo. Cada corrida regenera únicamente los formatos pedidos: salidas
+        # previas de formatos no pedidos en esta corrida permanecen en disco.
+        ruta_base.parent.mkdir(exist_ok=True)
+        fd, tmp = tempfile.mkstemp(suffix=".wav", dir=str(ruta_base.parent))
+        os.close(fd)
+        ruta_wav_trabajo = Path(tmp)
+        temporales: List[Path] = [ruta_wav_trabajo]
 
         # --- Sintetizar incrementalmente ---
         log.info("Generando voz sintética...")
@@ -149,28 +163,69 @@ class ProcesarArchivo:
 
             # --- Exportar ---
             log.info("Exportando audio...")
+            # Fase 1: generar todo a archivos temporales. Así, un fallo en
+            # cualquier conversión no deja ninguna salida vieja reemplazada.
+            salidas: List[Tuple[Path, Path]] = []
             if parcial_escrito:
                 self._exportador.wav_append(fragmentos, ruta_wav_trabajo)
                 for formato in formatos:
-                    if formato == "wav" and usando_wav:
-                        continue
-                    self._exportador.convertir_desde_wav(
-                        ruta_wav_trabajo,
-                        Path(str(ruta_base) + "." + formato),
-                        formato,
-                    )
+                    if formato == "wav":
+                        salidas.append((ruta_wav_trabajo, Path(str(ruta_base) + ".wav")))
+                    else:
+                        temporal = self._nuevo_temporal(ruta_base.parent, formato, temporales)
+                        self._exportador.convertir_desde_wav(ruta_wav_trabajo, temporal, formato)
+                        salidas.append((temporal, Path(str(ruta_base) + "." + formato)))
             else:
                 for formato in formatos:
-                    self._exportador.escribir_audio(
-                        fragmentos,
-                        Path(str(ruta_base) + "." + formato),
-                        formato,
-                    )
+                    temporal = self._nuevo_temporal(ruta_base.parent, formato, temporales)
+                    self._exportador.escribir_audio(fragmentos, temporal, formato)
+                    salidas.append((temporal, Path(str(ruta_base) + "." + formato)))
+
+            # Fase 2: publicar. La garantía es por archivo (cada os.replace es
+            # atómico); si un formato falla aquí, los demás ya se actualizaron.
+            # El WAV se publica al final: así, si un formato falla (ej: archivo
+            # abierto en otra app), no queda un WAV nuevo con el resto de los
+            # formatos viejos — el WAV solo se actualiza si todo lo demás pudo.
+            for temporal, destino in self._orden_publicacion(salidas):
+                self._publicar(temporal, destino, temporales)
         finally:
-            if not usando_wav and ruta_wav_trabajo.exists():
-                ruta_wav_trabajo.unlink()
+            for temporal in temporales:
+                try:
+                    temporal.unlink()
+                except (FileNotFoundError, PermissionError):
+                    pass
 
         for formato in formatos:
             ruta = Path(str(ruta_base) + "." + formato)
             duracion = self._exportador.duracion_audio(ruta)
             log.info("  + %s (%s): %.1f s", ruta.name, formato.upper(), duracion)
+
+    def _publicar(self, origen: Path, destino: Path, temporales: List[Path]) -> None:
+        """Publica ``origen`` como ``destino`` solo en éxito.
+
+        ``os.replace`` es atómico: si existe un output previo en ``destino``
+        queda intacto hasta este momento (y se sobrescribe recién acá).
+        """
+        try:
+            os.replace(origen, destino)
+        except PermissionError:
+            log.error(
+                "El archivo '%s' está en uso por otra aplicación; no se actualizó.",
+                destino,
+            )
+            raise
+        temporales.remove(origen)
+
+    @staticmethod
+    def _orden_publicacion(salidas: List[Tuple[Path, Path]]) -> List[Tuple[Path, Path]]:
+        """Ordena las salidas para publicar: los no-WAV primero, el WAV al final."""
+        return sorted(salidas, key=lambda par: par[1].name.lower().endswith(".wav"))
+
+    @staticmethod
+    def _nuevo_temporal(carpeta: Path, sufijo: str, temporales: List[Path]) -> Path:
+        """Crea un archivo temporal de salida y lo registra para limpieza."""
+        fd, tmp = tempfile.mkstemp(suffix="." + sufijo, dir=str(carpeta))
+        os.close(fd)
+        temporal = Path(tmp)
+        temporales.append(temporal)
+        return temporal

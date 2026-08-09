@@ -62,7 +62,13 @@ class ExportadorAudioSoundfile:
             f.write(struct.pack("<I", tamaño - 44))
 
     def convertir_desde_wav(self, ruta_wav: Path, ruta_destino: Path, formato: str) -> None:
-        """Re-encoda un WAV existente al formato indicado (ver contrato)."""
+        """Re-encoda un WAV existente al formato indicado (ver contrato).
+
+        Precaución: ``sf.read`` carga el WAV COMPLETO a RAM como float64.
+        En libros enormes que dispararon flushes de memoria (~500 MB de
+        límite), esto puede picos de 2-4 GB. El flush acota la RAM de
+        síntesis, no la de conversión.
+        """
         data, sr = sf.read(str(ruta_wav))
         ruta_destino.parent.mkdir(exist_ok=True)
         sf.write(str(ruta_destino), data, sr, subtype=SUBTIPOS_AUDIO[formato])
