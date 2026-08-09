@@ -48,18 +48,28 @@ class RepositorioArchivosLocal:
         return ruta.read_text(encoding="utf-8")
 
     @staticmethod
-    def _natural_sort_key(path: Path) -> Tuple[int, ...]:
+    def _natural_sort_key(path: Path) -> Tuple[object, ...]:
         """Genera clave de ordenamiento numérico-natural para un Path.
 
-        Extrae todos los números del nombre del archivo y los usa como clave.
-        Si no encuentra números, usa el nombre completo como string.
+        Separa el nombre en tokens alternados de texto y número (los números
+        se comparan como enteros), para que ``capitulo10.md`` siga a
+        ``capitulo2.md`` y a ``capitulo.md``. El discriminador inicial separa
+        los nombres que empiezan con número de los que empiezan con texto para
+        que nunca se comparen ``int`` contra ``str``, y el ``path.stem`` final
+        desempata de forma determinista nombres numéricamente iguales.
 
         Ejemplos:
-            archivo2.md  → (2,)
-            archivo10.md → (10,)
-            epilogo.md    → ('epilogo.md',)  ← orden alfabético
+            capitulo.md   → (1, ('capitulo',), 'capitulo')
+            capitulo2.md  → (1, ('capitulo', 2), 'capitulo2')
+            capitulo10.md → (1, ('capitulo', 10), 'capitulo10')
+            3.md          → (0, (3,), '3')
         """
-        numeros = re.findall(r"\d+", path.stem)
-        if numeros:
-            return tuple(int(n) for n in numeros)
-        return (path.stem,)  # type: ignore[return-value]
+        tokens = tuple(
+            int(parte) if parte.isdigit() else parte
+            for parte in re.split(r"(\d+)", path.stem)
+            if parte != ""
+        )
+        if not tokens:
+            tokens = (path.stem,)
+        empieza_con_numero = isinstance(tokens[0], int)
+        return (0 if empieza_con_numero else 1, tokens, path.stem)
