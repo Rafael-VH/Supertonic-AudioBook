@@ -14,6 +14,9 @@ audio/
 archivos/
 modelo/
 
+# Modelo TTS descargado (fuente de verdad del build; se descarga en runtime)
+resource/
+
 # Preferencias de la interfaz (generadas en runtime)
 app/preferencias.json
 

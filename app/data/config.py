@@ -37,11 +37,25 @@ def _carpeta_base() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
+def _carpeta_modelo() -> Path:
+    """Carpeta canónica del modelo TTS.
+
+    - Empaquetado (``sys.frozen``): junto al .exe (``base/modelo``), para que
+      el portable funcione offline y las descargas queden junto a la app.
+    - En desarrollo: ``resource/modelo`` en la raíz del proyecto, que es la
+      fuente de verdad que los builds copian al dist. Así un rebuild de
+      PyInstaller (que borra ``app/dist``) no pierde el modelo descargado.
+    """
+    if getattr(sys, "frozen", False):
+        return _carpeta_base() / "modelo"
+    return _carpeta_base().parent / "resource" / "modelo"
+
+
 def configurar_entorno() -> Path:
-    """Apuntar la caché del modelo TTS a la carpeta ``modelo/`` local.
+    """Apuntar la caché del modelo TTS a la carpeta local correspondiente.
 
     Se llama antes de instanciar el motor. Devuelve la carpeta base.
     """
     base = _carpeta_base()
-    os.environ.setdefault("SUPERTONIC_CACHE_DIR", str(base / "modelo"))
+    os.environ.setdefault("SUPERTONIC_CACHE_DIR", str(_carpeta_modelo()))
     return base

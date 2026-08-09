@@ -24,7 +24,7 @@ El spec:
 - `collect_all('huggingface_hub')` — empaqueta los datos/binarios del hub (el modelo se descarga en runtime).
 - `console=False`, nombre `SupertonicAudioBook`, one-folder (`COLLECT`).
 
-Para distribuir offline: copiá la carpeta `modelo/` junto al `.exe` (la app fija `SUPERTONIC_CACHE_DIR=modelo/`). Verificá con `SupertonicAudioBook.exe --self-test`.
+Para distribuir offline: el modelo se guarda en `resource/modelo/` (raíz del proyecto, fuente de verdad) y se copia a `app/dist/SupertonicAudioBook/` al compilar el instalador completo. La app en runtime fija `SUPERTONIC_CACHE_DIR=modelo/` junto al `.exe` (empaquetada) o `resource/modelo/` (desarrollo). Verificá con `SupertonicAudioBook.exe --self-test`.
 
 ## Instaladores portables — `packaging/`
 
@@ -54,9 +54,12 @@ El script NO compila la app: lee la ya compilada en `app/dist/SupertonicAudioBoo
 | `APP_DIST` | `<raiz>/app/dist/SupertonicAudioBook` |
 | `APP_EXE` | `APP_DIST/SupertonicAudioBook.exe` |
 | `STAGING_LITE` | `<raiz>/packaging/staging_lite/SupertonicAudioBook` |
-| `MODELO` | `APP_DIST/modelo` |
+| `RESOURCE_MODELO` | `<raiz>/resource/modelo` (fuente de verdad del modelo) |
+| `MODELO` | `APP_DIST/modelo` (copia que viaja en el instalador completo) |
 
-Pasos: verifica la app → copia `APP_DIST` a `STAGING_LITE` **sin** `modelo/` (variante Lite) → compila el instalador completo → compila el Lite.
+Pasos: verifica la app → copia `APP_DIST` a `STAGING_LITE` **sin** `modelo/` (variante Lite) → `sincronizar_modelo()` copia `resource/modelo` a `APP_DIST/modelo` si falta → compila el instalador completo → compila el Lite.
+
+> **`resource/modelo` es la fuente de verdad**: `pyinstaller --noconfirm` borra `app/dist` completo (modelo incluido). El modelo NO vive en `dist`: se guarda en `resource/modelo` (raíz) y el build lo copia al dist recién cuando compila el instalador completo. `resource/` está en `.gitignore`.
 
 ### Specs portables
 
@@ -65,9 +68,9 @@ Pasos: verifica la app → copia `APP_DIST` a `STAGING_LITE` **sin** `modelo/` (
 
 ### Variante Lite (sin modelo)
 
-- Al primer uso la app necesita internet: `TTS(auto_download=True)` + `SUPERTONIC_CACHE_DIR=modelo/` junto al exe descargan el modelo automáticamente.
+- Al primer uso la app necesita internet: `TTS(auto_download=True)` + `SUPERTONIC_CACHE_DIR` apuntando a `modelo/` junto al exe descargan el modelo automáticamente.
 - La descarga ocurre UNA vez; después funciona offline igual que la completa.
-- El modelo descargado y el empaquetado son el mismo; no se duplica si ya existe.
+- En desarrollo, la descarga va a `resource/modelo/` (raíz), así el instalador completo siguiente la reutiliza sin volver a bajarla.
 
 ## Flujo de build completo (para release)
 
@@ -82,9 +85,9 @@ Antes de compilar se ejecuta el **gate de calidad** (regla 5 de `AGENTS.md`, obl
    c. Opcional: self-test real (descarga el modelo la 1ra vez)
 
 1. pyinstaller app/SupertonicAudioBook.spec        → app/dist/SupertonicAudioBook/
-2. python app/main.py --self-test  (opcional, verifica el motor)
-3. copiar modelo/ a app/dist/SupertonicAudioBook/  (si se quiere offline)
-4. python packaging/build_portables.py             → packaging/dist/*.exe
+2. python app/main.py --self-test  (opcional, verifica el motor; descarga el modelo a resource/modelo la 1ra vez)
+3. python packaging/build_portables.py             → packaging/dist/*.exe
+   (el build copia resource/modelo a app/dist/modelo para el instalador completo)
 ```
 
 ## Gotchas de empaquetado

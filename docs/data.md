@@ -16,16 +16,21 @@ Constantes del mundo del audio. La lógica de negocio vive en `domain/`; acá so
 
 ### `configurar_entorno() -> Path`
 
-Apunta la caché del modelo a la carpeta `modelo/` local y devuelve la carpeta base:
+Apunta la caché del modelo a la carpeta local correspondiente y devuelve la carpeta base:
 
 ```python
-os.environ.setdefault("SUPERTONIC_CACHE_DIR", str(base / "modelo"))
+os.environ.setdefault("SUPERTONIC_CACHE_DIR", str(_carpeta_modelo()))
 ```
 
 La carpeta base (`_carpeta_base()`) se resuelve así:
 
 - **Empaquetado** (`sys.frozen`): junto al `.exe` (`sys.executable`).
 - **En desarrollo**: `parents[1]` de `data/config.py` = `app/`.
+
+La carpeta del modelo (`_carpeta_modelo()`) se resuelve así:
+
+- **Empaquetado**: `base/modelo` (junto al `.exe`, para que el portable funcione offline y las descargas queden junto a la app).
+- **En desarrollo**: `resource/modelo` en la raíz del proyecto. Es la **fuente de verdad** del modelo: los builds la copian al dist, de modo que un rebuild de PyInstaller (que borra `app/dist`) no pierde el modelo descargado.
 
 Se llama en `main.py` (raíz) y de nuevo en `MotorSupertonic.__init__` (por seguridad, usando `setdefault` para no pisar).
 

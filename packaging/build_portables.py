@@ -31,6 +31,10 @@ APP_DIST = RAIZ / "app" / "dist" / "SupertonicAudioBook"
 APP_EXE = APP_DIST / "SupertonicAudioBook.exe"
 STAGING_LITE = RAIZ / "packaging" / "staging_lite" / "SupertonicAudioBook"
 
+# Fuente de verdad del modelo TTS. El rebuild de la app (pyinstaller
+# --noconfirm) borra app/dist; el modelo NO se guarda ahí, se copia desde
+# resource/modelo al compilar el instalador completo.
+RESOURCE_MODELO = RAIZ / "resource" / "modelo"
 MODELO = APP_DIST / "modelo"
 
 
@@ -64,13 +68,28 @@ def preparar_staging_lite() -> None:
     print(f"[build] Staging listo: {STAGING_LITE}")
 
 
-def compilar_instalador_completo() -> None:
-    if not MODELO.is_dir():
+def sincronizar_modelo() -> None:
+    """Copia el modelo desde resource/modelo hacia app/dist, si falta.
+
+    La fuente de verdad es ``resource/modelo`` (raíz del proyecto). El rebuild
+    de la app con ``pyinstaller --noconfirm`` borra ``app/dist`` y con él el
+    modelo; por eso el instalador completo se compila SIEMPRE desde resource.
+    """
+    if MODELO.is_dir():
+        return
+    if not RESOURCE_MODELO.is_dir():
         raise SystemExit(
-            "Falta el modelo TTS en app/dist/SupertonicAudioBook/modelo.\n"
+            f"Falta el modelo TTS en {RESOURCE_MODELO}.\n"
             "El instalador COMPLETO lo necesita. Corré la app una vez para que "
-            "lo descargue, o usá --solo-lite para generar solo el instalador Lite."
+            "lo descargue a resource/modelo, o usá --solo-lite."
         )
+    print(f"[build] Copiando modelo desde {RESOURCE_MODELO}...")
+    shutil.copytree(RESOURCE_MODELO, MODELO)
+    print(f"[build] Modelo listo: {MODELO}")
+
+
+def compilar_instalador_completo() -> None:
+    sincronizar_modelo()
     print("[build] Compilando instalador COMPLETO (con modelo)...")
     _ejecutar(
         [sys.executable, "-m", "PyInstaller", "SupertonicAudioBook-Portable.spec", "--noconfirm"],
