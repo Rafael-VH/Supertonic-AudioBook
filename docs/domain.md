@@ -92,9 +92,23 @@ ProcesarCapitulo(motor, archivos, exportador, *,
 
 procesar(capitulo: Capitulo, ruta_base: Path, *,
          steps: int, speed: float, formatos: List[str],
+         lang: str = DEFAULT_LANG,
          on_progreso: Callable[[int, int], None] | None = None,
          debe_detenerse: Callable[[], bool] | None = None) -> None
 ```
+
+### `sintetizar_muestra.py` — `SintetizarMuestra` (prueba de voz)
+
+```python
+SintetizarMuestra(motor: MotorTTS, exportador: ExportadorAudio)
+
+generar(texto: str, *, lang: str = DEFAULT_LANG, ruta: Path) -> Path
+```
+
+Genera un WAV PCM corto con el motor y el exportador inyectados, sin pasar
+por el pipeline de capítulos. Lo usa la GUI para probar una voz con el idioma
+seleccionado antes de procesar. Se compone en `main.py` con
+`fabrica_muestra(voz)`.
 
 - **Inyección de valores técnicos**: `silencio_muestras` y `memoria_safe_margin_bytes` NO se importan de `data/`; se inyectan desde la raíz de composición. El dominio no conoce `config.py`.
 - `ruta_base` es la ruta de salida sin extensión (ej: `audio/capitulo`); el método agrega `.formato`.

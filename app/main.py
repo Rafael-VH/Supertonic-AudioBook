@@ -26,6 +26,7 @@ from data.repositories.repositorio_archivos import RepositorioArchivosLocal
 from data.repositories.repositorio_preferencias import PreferenciasJSONLocal
 from domain.repositories.motor_tts import MotorTTS
 from domain.use_cases.procesar_capitulo import ProcesarCapitulo
+from domain.use_cases.sintetizar_muestra import SintetizarMuestra
 
 CARPETA_BASE = configurar_entorno()
 
@@ -33,6 +34,11 @@ CARPETA_BASE = configurar_entorno()
 def fabrica_motor(voz: str) -> MotorTTS:
     """Crea el motor de síntesis con la voz pedida."""
     return MotorSupertonic(voz=voz)
+
+
+def fabrica_muestra(voz: str) -> SintetizarMuestra:
+    """Compone el caso de uso de muestra de voz con las implementaciones."""
+    return SintetizarMuestra(motor=MotorSupertonic(voz=voz), exportador=ExportadorAudioSoundfile())
 
 
 def fabrica_use_case(voz: str) -> ProcesarCapitulo:
@@ -63,6 +69,7 @@ def main() -> None:
 
     app = AppLector(
         fabrica_use_case=fabrica_use_case,
+        fabrica_muestra=fabrica_muestra,
         repositorio=RepositorioArchivosLocal(),
         carpeta_base=CARPETA_BASE,
         repositorio_preferencias=PreferenciasJSONLocal(CARPETA_BASE / "preferencias.json"),

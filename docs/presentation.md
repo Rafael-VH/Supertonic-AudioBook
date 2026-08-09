@@ -48,6 +48,7 @@ Entrada: `AppLector(*, fabrica_use_case, repositorio, carpeta_base, repositorio_
 | Salida de audio | Entry + "Examinar…" (arriba, en el tab "Entrada y salida") |
 | Formatos | Checkboxes `WAV`/`FLAC`/`OGG`/`MP3`; `wav` y `mp3` marcados por defecto. Obliga a elegir al menos uno |
 | Voz | Combobox readonly |
+| Escuchar | Botón `▶` que sintetiza y reproduce una muestra corta con la voz e idioma seleccionados (hilo aparte; se deshabilita mientras genera). Texto de ejemplo por idioma (`TEXTO_MUESTRA_IDIOMAS`); los idiomas sin entrada usan el texto traducido de la interfaz. Reproduce con `winsound` (WAV PCM, sin dependencias). Requiere `fabrica_muestra` inyectada desde `main.py` |
 | Pasos | Slider 5–12 |
 | Velocidad | Slider 0.7–2.0 |
 | Idioma de la voz | Combobox readonly con los 32 idiomas de `LANGUAGES_VOZ` (`IDIOMAS_VOZ_NATIVOS` muestra el nombre nativo; `na` aparece como "Auto (sin idioma)"). Se persiste en la clave `lang_voz` |

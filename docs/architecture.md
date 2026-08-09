@@ -49,6 +49,7 @@ Funciones de composición expuestas:
 
 - `CARPETA_BASE = configurar_entorno()` — resuelve la carpeta base (junto al exe si está empaquetada, si no `app/`) y apunta la caché del modelo a `modelo/`.
 - `fabrica_motor(voz) -> MotorTTS` — crea `MotorSupertonic` con la voz pedida.
+- `fabrica_muestra(voz) -> SintetizarMuestra` — compone el caso de uso de muestra de voz (motor + exportador) para el botón "Escuchar" de la GUI.
 - `fabrica_use_case(voz) -> ProcesarCapitulo` — compone el caso de uso completo con motor, repositorio y exportador concretos, inyectando `SILENCE_SAMPLES` y `MEMORY_SAFE_MARGIN_BYTES`.
 
 Por eso `fabrica_use_case` acepta la voz como parámetro: la CLI/GUI la toman del usuario y la raíz recompone un caso de uso por cada voz.

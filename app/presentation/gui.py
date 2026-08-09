@@ -9,12 +9,14 @@ import logging
 import os
 import queue
 import sys
+import tempfile
 import threading
 import time
 import tkinter as tk
+import winsound
 from pathlib import Path
 from tkinter import filedialog, scrolledtext, ttk
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional
 
 from domain.entities.capitulo import Capitulo
 from domain.repositories.motor_tts import (
@@ -28,11 +30,33 @@ from domain.repositories.repositorio_archivos import RepositorioArchivos
 from domain.repositories.repositorio_preferencias import RepositorioPreferencias
 from domain.use_cases.formato import FORMATOS_NATIVOS
 from domain.use_cases.procesar_capitulo import ProcesarCapitulo
+from domain.use_cases.sintetizar_muestra import SintetizarMuestra
 
 log = logging.getLogger("lector")
 
 VOCES: tuple = ("M1", "M2", "M3", "M4", "M5", "F1", "F2", "F3", "F4", "F5")
 """Voces integradas del modelo supertonic-3 (M1-M5, F1-F5)."""
+
+TEXTO_MUESTRA_IDIOMAS: dict = {
+    "es": "Hola, soy la voz de Supertonic. Esta es una muestra de audio.",
+    "en": "Hello, I am a Supertonic voice. This is an audio sample.",
+    "fr": "Bonjour, je suis une voix Supertonic. Ceci est un échantillon audio.",
+    "de": "Hallo, ich bin eine Supertonic-Stimme. Das ist eine Audioprobe.",
+    "pt": "Olá, eu sou uma voz Supertonic. Esta é uma amostra de áudio.",
+    "it": "Ciao, sono una voce Supertonic. Questo è un campione audio.",
+    "nl": "Hallo, ik ben een Supertonic-stem. Dit is een audiofragment.",
+    "pl": "Cześć, jestem głosem Supertonic. To jest próbka audio.",
+    "ru": "Привет, я голос Supertonic. Это образец аудио.",
+    "uk": "Привіт, я голос Supertonic. Це зразок аудіо.",
+    "tr": "Merhaba, ben bir Supertonic sesiyim. Bu bir ses örneğidir.",
+    "ja": "こんにちは、Supertonicの音声です。オーディオサンプルです。",
+    "ko": "안녕하세요, Supertonic 음성입니다. 오디오 샘플입니다.",
+    "ar": "مرحباً، أنا صوت سوبرتونيك. هذه عينة صوتية.",
+    "hi": "नमस्ते, मैं Supertonic आवाज़ हूँ। यह एक ऑडियो नमूना है।",
+    "vi": "Xin chào, tôi là giọng nói Supertonic. Đây là mẫu âm thanh.",
+}
+"""Texto de muestra por idioma de voz (los idiomas sin entrada usan el texto
+traducido del idioma de la interfaz)."""
 
 IDIOMAS_VOZ_NATIVOS: dict = {
     "en": "English", "es": "Español", "fr": "Français", "de": "Deutsch",
@@ -122,6 +146,11 @@ TRADUCCIONES: dict = {
         "rapido_lento": "más rápido / más lento",
         "idioma_voz": "Idioma de la voz",
         "idioma_voz_auto": "Auto (sin idioma)",
+        "escuchar": "Escuchar",
+        "muestra_texto": "Esta es una muestra de la voz sintética.",
+        "log_muestra": "    Generando muestra de voz {voz} ({lang})...",
+        "log_muestra_fin": "    Muestra lista. Reproduciendo...",
+        "log_muestra_error": "    No se pudo generar o reproducir la muestra.",
         "registro": "Registro",
         "btn_procesar": "▶  Procesar",
         "btn_cancelar": "■  Cancelar",
@@ -187,6 +216,11 @@ TRADUCCIONES: dict = {
         "rapido_lento": "faster / slower",
         "idioma_voz": "Voice language",
         "idioma_voz_auto": "Auto (no language)",
+        "escuchar": "Listen",
+        "muestra_texto": "This is a sample of the synthetic voice.",
+        "log_muestra": "    Generating sample of voice {voz} ({lang})...",
+        "log_muestra_fin": "    Sample ready. Playing...",
+        "log_muestra_error": "    Could not generate or play the sample.",
         "registro": "Log",
         "btn_procesar": "▶  Process",
         "btn_cancelar": "■  Cancel",
@@ -248,18 +282,22 @@ class AppLector(tk.Tk):
         self,
         *,
         fabrica_use_case: Callable[[str], ProcesarCapitulo],
+        fabrica_muestra: Optional[Callable[[str], SintetizarMuestra]] = None,
         repositorio: RepositorioArchivos,
         carpeta_base: Path,
         repositorio_preferencias: RepositorioPreferencias,
     ) -> None:
         """Args:
             fabrica_use_case: Crea ``ProcesarCapitulo`` para una voz dada.
+            fabrica_muestra: Crea ``SintetizarMuestra`` para probar la voz
+                (``None`` oculta el botón "Escuchar").
             repositorio: Acceso a los archivos en disco (inyectado).
             carpeta_base: Carpeta base de la app (modelo/, archivos/, audio/).
             repositorio_preferencias: Persistencia de preferencias de la UI.
         """
         super().__init__()
         self._fabrica_use_case = fabrica_use_case
+        self._fabrica_muestra = fabrica_muestra
         self._repositorio = repositorio
         self._carpeta_base = carpeta_base
         self._repositorio_preferencias = repositorio_preferencias
@@ -280,12 +318,14 @@ class AppLector(tk.Tk):
         self._cancelar = threading.Event()
         self._hilo: threading.Thread | None = None
         self._en_ejecucion = False
+        self._probando_voz = False
         self._archivos: List[Path] = []
         self._seleccion: List[Path] = []
         self._ventana_ajustes: tk.Toplevel | None = None
         self._main: ttk.Frame | None = None
         self._snackbar: ttk.Label | None = None
         self._snackbar_id: str | None = None
+        self._btn_escuchar: ttk.Button | None = None
         self._txt: scrolledtext.ScrolledText | None = None
 
         self._handler_log = _LogHaciaCola(self._cola)
@@ -480,6 +520,11 @@ class AppLector(tk.Tk):
         ttk.Label(
             fila_voz, text=self.t("modelo_supertonic"), style="CardHint.TLabel"
         ).pack(side="left", padx=(10, 0))
+        if self._fabrica_muestra is not None:
+            self._btn_escuchar = ttk.Button(
+                fila_voz, text=self.t("escuchar"), command=self._escuchar_muestra
+            )
+            self._btn_escuchar.pack(side="left", padx=(12, 0))
 
         # Pasos
         ttk.Label(f_opciones, text=self.t("pasos"), style="Etiqueta.TLabel").grid(
@@ -1109,6 +1154,34 @@ class AppLector(tk.Tk):
 
     # ------------------------------------------------------------- worker
 
+    def _escuchar_muestra(self) -> None:
+        """Sintetiza y reproduce una muestra de la voz e idioma seleccionados."""
+        if self._probando_voz or self._fabrica_muestra is None:
+            return
+        self._probando_voz = True
+        if self._btn_escuchar is not None:
+            self._btn_escuchar.config(state="disabled")
+        voz = self._var_voz.get()
+        lang = self._codigo_idioma_voz()
+        texto = TEXTO_MUESTRA_IDIOMAS.get(lang, self.t("muestra_texto"))
+        threading.Thread(
+            target=self._generar_y_reproducir, args=(voz, lang, texto), daemon=True
+        ).start()
+
+    def _generar_y_reproducir(self, voz: str, lang: str, texto: str) -> None:
+        try:
+            self._cola.put(("log", "info", self.t("log_muestra").format(voz=voz, lang=lang)))
+            muestra = self._fabrica_muestra(voz)
+            ruta = Path(tempfile.gettempdir()) / f"supertonic_muestra_{voz}_{lang}.wav"
+            muestra.generar(texto, lang=lang, ruta=ruta)
+            winsound.PlaySound(str(ruta), winsound.SND_FILENAME | winsound.SND_ASYNC)
+            self._cola.put(("log", "info", self.t("log_muestra_fin")))
+        except Exception:
+            logging.getLogger("gui").exception("Error al reproducir la muestra")
+            self._cola.put(("log", "error", self.t("log_muestra_error")))
+        finally:
+            self._cola.put(("btn_muestra",))
+
     def _trabajo(self) -> None:
         inicio = time.monotonic()
         try:
@@ -1182,6 +1255,10 @@ class AppLector(tk.Tk):
         if tipo == "log":
             _, nivel, texto = msg
             self._escribir_log(texto, nivel)
+        elif tipo == "btn_muestra":
+            self._probando_voz = False
+            if self._btn_escuchar is not None:
+                self._btn_escuchar.config(state="normal")
         elif tipo == "capitulo":
             _, i, n, nombre = msg
             self._lbl_estado.config(text=self.t("estado_archivo").format(i=i, n=n, nombre=nombre))
