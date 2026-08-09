@@ -6,9 +6,7 @@ Recibe las dependencias ya inyectadas desde la raíz de composición
 """
 
 import logging
-import os
 import queue
-import sys
 import tempfile
 import threading
 import time
@@ -351,6 +349,8 @@ class AppLector(tk.Tk):
             self._snackbar = None
         self._snackbar_id = None
         self._modo_ancho = False
+        self._vars_check = {}
+        self._checks = {}
 
         main = ttk.Frame(self, padding=12)
         self._main = main
@@ -417,6 +417,9 @@ class AppLector(tk.Tk):
         self._snackbar_id: str | None = None
 
         self.bind("<Configure>", self._reajustar_layout)
+        # Rueda del mouse: binding en el toplevel, no en bind_all, para no
+        # pisar bindings "all" ajenos ni acumular handlers en cada rebuild.
+        self.bind("<MouseWheel>", self._scroll_lienzo)
 
     def _construir_panel_entrada(self) -> None:
         panel = self._panel_entrada
@@ -455,6 +458,7 @@ class AppLector(tk.Tk):
         lista_frame = ttk.Frame(fila_lista, style="Tarjeta.TFrame")
         lista_frame.pack(side="left", fill="both", expand=True)
         scroll = ttk.Scrollbar(lista_frame, orient="vertical")
+        self._scrollbar_lista = scroll
         self._lienzo = tk.Canvas(
             lista_frame,
             highlightthickness=0,
@@ -473,8 +477,6 @@ class AppLector(tk.Tk):
         self._lienzo.bind(
             "<Configure>", lambda e: self._lienzo.itemconfig(self._ventana_lienzo, width=e.width)
         )
-        self._lienzo.bind("<MouseWheel>", self._scroll_lienzo)
-        self._contenedor_check.bind("<MouseWheel>", self._scroll_lienzo)
 
         panel_botones = ttk.Frame(fila_lista, style="Tarjeta.TFrame")
         panel_botones.pack(side="left", fill="y", padx=(8, 0))
@@ -1070,7 +1072,29 @@ class AppLector(tk.Tk):
         self._actualizar_conteo()
 
     def _scroll_lienzo(self, event) -> None:
-        self._lienzo.yview_scroll(int(-event.delta / 120), "units")
+        """Scrollea la lista solo si la rueda ocurre sobre ella o sus hijos.
+
+        El binding está en el toplevel (``self.bind``): el evento se entrega
+        al widget bajo el puntero (p. ej. un ``tk.Checkbutton``, que no tiene
+        binding propio) y su cadena de bindtags incluye este toplevel. Si el
+        puntero está fuera de la lista (p. ej. sobre el Registro), no se hace
+        nada y el widget de abajo conserva su scroll nativo.
+        """
+        if not hasattr(self, "_lienzo"):
+            return
+        try:
+            widget = self.winfo_containing(event.x_root, event.y_root)
+        except tk.TclError:
+            return
+        while widget is not None and widget is not self:
+            if widget is self._lienzo or widget is self._scrollbar_lista:
+                # Windows entrega deltas de ±120 (rueda) o fracciones en
+                # touchpads de precisión: se usa solo la dirección para que los
+                # pasos cortos no se trunquen a 0 (sin scroll).
+                self._lienzo.yview_scroll(-1 if event.delta > 0 else 1, "units")
+                return "break"
+            widget = getattr(widget, "master", None)
+        return None
 
     def _seleccionar_todo(self) -> None:
         for var in self._vars_check.values():
