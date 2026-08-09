@@ -37,8 +37,10 @@ Entrada: `AppLector(*, fabrica_use_case, repositorio, carpeta_base, repositorio_
 | Elemento | Detalle |
 |----------|---------|
 | `VOCES` | `("M1".."M5", "F1".."F5")` — 10 voces del modelo |
-| Tema | Claro/oscuro con paleta Material Design 3 (`PALETA_CLARA`/`PALETA_OSCURA`), alternable con el botón de la cabecera |
-| Cabecera | Título + botón alternador de tema |
+| Tema | Claro/oscuro con paleta Material Design 3 (`PALETA_CLARA`/`PALETA_OSCURA`) |
+| Idioma | Español/Inglés (`IDIOMAS`/`TRADUCCIONES`); `self.t(clave)` traduce todos los textos. Se cambia desde Ajustes y se persiste |
+| Cabecera | Título + botón de ajustes (`⚙`) que abre la ventana flotante de configuración (`_abrir_ajustes`) |
+| Ventana de ajustes | `tk.Toplevel` transiente centrada sobre la principal; muestra la configuración del programa. Secciones: **Tema** (Claro/Oscuro, aplica y guarda al instante) e **Idioma** (combobox Español/Inglés, reconstruye la UI al cambiar). Estructurada para sumar más secciones (voz, formatos, etc.) |
 | Pestañas | `ttk.Notebook`: "Entrada y salida" (carpetas + lista) y "Síntesis y registro" (opciones + log) |
 | Layout responsive | Bajo `UMBRAL_ANCHO` (900 px) usa pestañas; a partir de ahí muestra ambos paneles lado a lado en columnas (`_modo_columnas`/`_modo_pestanas`) |
 | Carpeta de origen | Entry + "Examinar…", en tarjeta propia separada de la lista |
@@ -55,9 +57,10 @@ Entrada: `AppLector(*, fabrica_use_case, repositorio, carpeta_base, repositorio_
 
 Preferencias persistentes (contrato `RepositorioPreferencias` de `domain/repositories`, implementado como JSON en `data/repositories/repositorio_preferencias.py`):
 
-- Se guardan al alternar tema, al iniciar un procesamiento y al cerrar la ventana.
-- Persisten: tema, voz, pasos, velocidad, formatos y carpetas de entrada/salida.
+- Se guardan al alternar tema, al cambiar idioma, al iniciar un procesamiento y al cerrar la ventana.
+- Persisten: tema, idioma, voz, pasos, velocidad, formatos y carpetas de entrada/salida.
 - Se inyectan desde `main.py` (`PreferenciasJSONLocal(CARPETA_BASE / "preferencias.json")`).
+- Cambiar idioma reconstruye la UI (`_reconstruir_ui`) preservando valores, log, tema y modo responsive.
 
 Arquitectura interna de la GUI (no se congela):
 

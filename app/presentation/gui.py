@@ -71,6 +71,136 @@ PALETA_OSCURA: dict = {
 }
 """Paleta oscura inspirada en Material Design 3 (baseline púrpura)."""
 
+IDIOMAS: dict = {"es": "Español", "en": "English"}
+"""Idiomas disponibles para la interfaz (código -> nombre mostrado)."""
+
+TRADUCCIONES: dict = {
+    "es": {
+        "ventana_titulo": "Supertonic-AudioBook — Conversor de archivos a audio",
+        "ajustes": "Ajustes",
+        "tema": "Tema",
+        "idioma": "Idioma",
+        "claro": "Claro",
+        "oscuro": "Oscuro",
+        "cerrar": "Cerrar",
+        "tab_entrada": "Entrada y salida",
+        "tab_sintesis": "Síntesis y registro",
+        "salida_audio": "Salida de audio",
+        "carpeta_origen": "Carpeta de origen",
+        "etiqueta_carpeta": "Carpeta:",
+        "examinar": "Examinar…",
+        "archivos_encontrados": "Archivos Encontrados",
+        "todo": "Todo",
+        "nada": "Nada",
+        "refrescar": "Refrescar",
+        "ayuda_seleccion": "Ctrl+clic\npara varios;\nvacío = todos",
+        "opciones_sintesis": "Opciones de síntesis",
+        "formato": "Formato",
+        "voz": "Voz",
+        "modelo_supertonic": "Modelo supertonic-3",
+        "pasos": "Pasos",
+        "calidad_lento": "más calidad = más lento",
+        "velocidad": "Velocidad",
+        "rapido_lento": "más rápido / más lento",
+        "registro": "Registro",
+        "btn_procesar": "▶  Procesar",
+        "btn_cancelar": "■  Cancelar",
+        "estado_listo": "Listo.",
+        "estado_archivo": "Archivo {i} de {n}: {nombre}",
+        "estado_segmentos": "{actual}/{total} segmentos sintetizados",
+        "estado_listo_n": "Listo: {n} archivo(s) en {tiempo}.",
+        "estado_cancelando": "Cancelando (exporta lo generado hasta ahora)…",
+        "estado_cancelado": "Cancelado por el usuario.",
+        "estado_error": "Error.",
+        "snackbar_formato": "Elegí al menos un formato de salida.",
+        "snackbar_sin_md": "No hay archivos .md en la carpeta de entrada.",
+        "snackbar_procesado": "Se procesaron {n} archivo(s) en {tiempo}.",
+        "snackbar_exportado": "Se exportó lo generado hasta el momento.",
+        "conteo_seleccionados": "{sel}/{total} seleccionados",
+        "conteo_archivos": "{total} archivos",
+        "conteo_sin": "Sin archivos",
+        "log_inicio": "▶ Inicio: {sel} archivo(s) seleccionado(s) de {total} disponible(s).",
+        "log_formato_no_ok": "No se pudo iniciar: no se eligió ningún formato de salida.",
+        "log_sin_md": "No se pudo iniciar: la carpeta de entrada no tiene archivos .md.",
+        "log_cancelar": "■ Cancelación solicitada: se exporta lo generado hasta el momento.",
+        "log_config_titulo": "  CONFIGURACIÓN",
+        "log_config_voz": "    Voz: {voz}   Pasos: {pasos}   Velocidad: {vel}",
+        "log_config_formatos": "    Formatos: {formatos}",
+        "log_config_salida": "    Salida: {salida}",
+        "log_archivo": "▶ Archivo {i}/{n}: {nombre}",
+        "log_segmento": "      Segmento {actual}/{total} sintetizado…",
+        "log_archivo_fin": "✔ Archivo {i}/{n} terminado.",
+        "log_completado": "✔ PROCESAMIENTO COMPLETADO: {n} archivo(s) en {tiempo}.",
+        "log_cancelado": "✖ Procesamiento cancelado por el usuario tras {tiempo}.",
+        "log_error": "✖ ERROR: {texto}",
+        "tiempo_seg": "{total} s",
+        "tiempo_min_seg": "{min} min {seg} s",
+        "tiempo_hora_min": "{horas} h {min} min",
+    },
+    "en": {
+        "ventana_titulo": "Supertonic-AudioBook — File to audio converter",
+        "ajustes": "Settings",
+        "tema": "Theme",
+        "idioma": "Language",
+        "claro": "Light",
+        "oscuro": "Dark",
+        "cerrar": "Close",
+        "tab_entrada": "Input & output",
+        "tab_sintesis": "Synthesis & log",
+        "salida_audio": "Audio output",
+        "carpeta_origen": "Source folder",
+        "etiqueta_carpeta": "Folder:",
+        "examinar": "Browse…",
+        "archivos_encontrados": "Files Found",
+        "todo": "All",
+        "nada": "None",
+        "refrescar": "Refresh",
+        "ayuda_seleccion": "Ctrl+click\nto select several;\nempty = all",
+        "opciones_sintesis": "Synthesis options",
+        "formato": "Format",
+        "voz": "Voice",
+        "modelo_supertonic": "supertonic-3 model",
+        "pasos": "Steps",
+        "calidad_lento": "more quality = slower",
+        "velocidad": "Speed",
+        "rapido_lento": "faster / slower",
+        "registro": "Log",
+        "btn_procesar": "▶  Process",
+        "btn_cancelar": "■  Cancel",
+        "estado_listo": "Ready.",
+        "estado_archivo": "File {i} of {n}: {nombre}",
+        "estado_segmentos": "{actual}/{total} segments synthesized",
+        "estado_listo_n": "Done: {n} file(s) in {tiempo}.",
+        "estado_cancelando": "Cancelling (exports what was generated so far)…",
+        "estado_cancelado": "Cancelled by the user.",
+        "estado_error": "Error.",
+        "snackbar_formato": "Choose at least one output format.",
+        "snackbar_sin_md": "There are no .md files in the input folder.",
+        "snackbar_procesado": "{n} file(s) processed in {tiempo}.",
+        "snackbar_exportado": "Exported what was generated so far.",
+        "conteo_seleccionados": "{sel}/{total} selected",
+        "conteo_archivos": "{total} files",
+        "conteo_sin": "No files",
+        "log_inicio": "▶ Start: {sel} file(s) selected of {total} available.",
+        "log_formato_no_ok": "Could not start: no output format was chosen.",
+        "log_sin_md": "Could not start: the input folder has no .md files.",
+        "log_cancelar": "■ Cancellation requested: what was generated so far will be exported.",
+        "log_config_titulo": "  CONFIGURATION",
+        "log_config_voz": "    Voice: {voz}   Steps: {pasos}   Speed: {vel}",
+        "log_config_formatos": "    Formats: {formatos}",
+        "log_config_salida": "    Output: {salida}",
+        "log_archivo": "▶ File {i}/{n}: {nombre}",
+        "log_segmento": "      Segment {actual}/{total} synthesized…",
+        "log_archivo_fin": "✔ File {i}/{n} finished.",
+        "log_completado": "✔ PROCESSING COMPLETED: {n} file(s) in {tiempo}.",
+        "log_cancelado": "✖ Processing cancelled by the user after {tiempo}.",
+        "log_error": "✖ ERROR: {texto}",
+        "tiempo_seg": "{total} s",
+        "tiempo_min_seg": "{min} min {seg} s",
+        "tiempo_hora_min": "{horas} h {min} min",
+    },
+}
+
 
 class _LogHaciaCola(logging.Handler):
     """Handler de logging que reenvía los mensajes a la cola de la UI."""
@@ -110,13 +240,17 @@ class AppLector(tk.Tk):
         self._carpeta_base = carpeta_base
         self._repositorio_preferencias = repositorio_preferencias
 
-        self.title("Supertonic-AudioBook — Conversor de archivos a audio")
-        self.geometry("660x720")
-        self.minsize(580, 640)
-
         self._tema_oscuro = False
         self._paleta = dict(PALETA_CLARA)
         self._preferencias_cargadas = self._repositorio_preferencias.cargar()
+
+        prefs = self._preferencias_cargadas if isinstance(self._preferencias_cargadas, dict) else {}
+        idioma = prefs.get("idioma", "es")
+        self._idioma = idioma if idioma in IDIOMAS else "es"
+
+        self.title(self.t("ventana_titulo"))
+        self.geometry("660x720")
+        self.minsize(580, 640)
 
         self._cola: "queue.Queue" = queue.Queue()
         self._cancelar = threading.Event()
@@ -124,6 +258,11 @@ class AppLector(tk.Tk):
         self._en_ejecucion = False
         self._archivos: List[Path] = []
         self._seleccion: List[Path] = []
+        self._ventana_ajustes: tk.Toplevel | None = None
+        self._main: ttk.Frame | None = None
+        self._snackbar: ttk.Label | None = None
+        self._snackbar_id: str | None = None
+        self._txt: scrolledtext.ScrolledText | None = None
 
         self._handler_log = _LogHaciaCola(self._cola)
         logging.getLogger().addHandler(self._handler_log)
@@ -139,10 +278,19 @@ class AppLector(tk.Tk):
     # ------------------------------------------------------------------ UI
 
     def _construir_widgets(self) -> None:
+        if self._main is not None:
+            self._main.destroy()
+        if self._snackbar is not None:
+            self._snackbar.destroy()
+            self._snackbar = None
+        self._snackbar_id = None
+        self._modo_ancho = False
+
         main = ttk.Frame(self, padding=12)
+        self._main = main
         main.pack(fill="both", expand=True)
 
-        # --- Cabecera con título y alternador de tema ---
+        # --- Cabecera con título y botón de ajustes ---
         cabecera = ttk.Frame(main)
         cabecera.pack(fill="x", pady=(0, 10))
         ttk.Label(
@@ -150,8 +298,8 @@ class AppLector(tk.Tk):
             text="Supertonic-AudioBook",
             style="Titulo.TLabel",
         ).pack(side="left")
-        self._btn_tema = ttk.Button(cabecera, text="Modo oscuro", command=self._cambiar_tema)
-        self._btn_tema.pack(side="right")
+        self._btn_ajustes = ttk.Button(cabecera, text="⚙", width=3, command=self._abrir_ajustes)
+        self._btn_ajustes.pack(side="right")
 
         # --- Zona de contenido: pestañas (angosto) o columnas lado a lado (ancho) ---
         self._contenido = ttk.Frame(main)
@@ -165,20 +313,20 @@ class AppLector(tk.Tk):
         self._construir_panel_entrada()
         self._construir_panel_sintesis()
 
-        self._notebook.add(self._panel_entrada, text="Entrada y salida")
-        self._notebook.add(self._panel_sintesis, text="Síntesis y registro")
+        self._notebook.add(self._panel_entrada, text=self.t("tab_entrada"))
+        self._notebook.add(self._panel_sintesis, text=self.t("tab_sintesis"))
         self._notebook.pack(fill="both", expand=True)
 
         # --- Acciones ---
         f_accion = ttk.Frame(main)
         f_accion.pack(fill="x", pady=(12, 0))
         self._btn_procesar = ttk.Button(
-            f_accion, text="▶  Procesar", style="Principal.TButton", command=self._procesar
+            f_accion, text=self.t("btn_procesar"), style="Principal.TButton", command=self._procesar
         )
         self._btn_procesar.pack(side="left")
         self._btn_cancelar = ttk.Button(
             f_accion,
-            text="■  Cancelar",
+            text=self.t("btn_cancelar"),
             command=self._cancelar_accion,
             state="disabled",
         )
@@ -189,7 +337,7 @@ class AppLector(tk.Tk):
         self._barra.pack(fill="x", pady=(12, 4))
         fila_progreso = ttk.Frame(main)
         fila_progreso.pack(fill="x")
-        self._lbl_estado = ttk.Label(fila_progreso, text="Listo.", anchor="w")
+        self._lbl_estado = ttk.Label(fila_progreso, text=self.t("estado_listo"), anchor="w")
         self._lbl_estado.pack(side="left", fill="x", expand=True)
         self._lbl_porcentaje = ttk.Label(
             fila_progreso, text="0%", style="Hint.TLabel", width=5, anchor="e"
@@ -208,31 +356,31 @@ class AppLector(tk.Tk):
         panel = self._panel_entrada
 
         # --- Carpeta de salida ---
-        f_salida = ttk.LabelFrame(panel, text="Salida de audio", style="Tarjeta.TLabelframe", padding=8)
+        f_salida = ttk.LabelFrame(panel, text=self.t("salida_audio"), style="Tarjeta.TLabelframe", padding=8)
         f_salida.pack(fill="x")
         fila = ttk.Frame(f_salida, style="Tarjeta.TFrame")
         fila.pack(fill="x")
-        ttk.Label(fila, text="Carpeta:", style="CardLabel.TLabel").pack(side="left")
+        ttk.Label(fila, text=self.t("etiqueta_carpeta"), style="CardLabel.TLabel").pack(side="left")
         self._var_carpeta_out = tk.StringVar(value=str(self._carpeta_base / "audio"))
         ttk.Entry(fila, textvariable=self._var_carpeta_out).pack(
             side="left", fill="x", expand=True, padx=6
         )
-        ttk.Button(fila, text="Examinar…", command=self._elegir_carpeta_out).pack(side="left")
+        ttk.Button(fila, text=self.t("examinar"), command=self._elegir_carpeta_out).pack(side="left")
 
         # --- Carpeta de origen (selección separada de la lista) ---
-        f_origen = ttk.LabelFrame(panel, text="Carpeta de origen", style="Tarjeta.TLabelframe", padding=8)
+        f_origen = ttk.LabelFrame(panel, text=self.t("carpeta_origen"), style="Tarjeta.TLabelframe", padding=8)
         f_origen.pack(fill="x", pady=(10, 0))
         fila = ttk.Frame(f_origen, style="Tarjeta.TFrame")
         fila.pack(fill="x")
-        ttk.Label(fila, text="Carpeta:", style="CardLabel.TLabel").pack(side="left")
+        ttk.Label(fila, text=self.t("etiqueta_carpeta"), style="CardLabel.TLabel").pack(side="left")
         self._var_carpeta_in = tk.StringVar(value=str(self._carpeta_base / "archivos"))
         ttk.Entry(fila, textvariable=self._var_carpeta_in).pack(
             side="left", fill="x", expand=True, padx=6
         )
-        ttk.Button(fila, text="Examinar…", command=self._elegir_carpeta_in).pack(side="left")
+        ttk.Button(fila, text=self.t("examinar"), command=self._elegir_carpeta_in).pack(side="left")
 
         # --- Archivos encontrados (lista) ---
-        f_lista = ttk.LabelFrame(panel, text="Archivos Encontrados", style="Tarjeta.TLabelframe", padding=8)
+        f_lista = ttk.LabelFrame(panel, text=self.t("archivos_encontrados"), style="Tarjeta.TLabelframe", padding=8)
         f_lista.pack(fill="both", expand=True, pady=(10, 0))
 
         fila_lista = ttk.Frame(f_lista, style="Tarjeta.TFrame")
@@ -255,15 +403,15 @@ class AppLector(tk.Tk):
 
         panel_botones = ttk.Frame(fila_lista, style="Tarjeta.TFrame")
         panel_botones.pack(side="left", fill="y", padx=(8, 0))
-        ttk.Button(panel_botones, text="Todo", width=9, command=self._seleccionar_todo).pack(fill="x")
-        ttk.Button(panel_botones, text="Nada", width=9, command=self._limpiar_seleccion).pack(fill="x", pady=(6, 0))
-        ttk.Button(panel_botones, text="Refrescar", width=9, command=self._refrescar_archivos).pack(fill="x", pady=(6, 0))
+        ttk.Button(panel_botones, text=self.t("todo"), width=9, command=self._seleccionar_todo).pack(fill="x")
+        ttk.Button(panel_botones, text=self.t("nada"), width=9, command=self._limpiar_seleccion).pack(fill="x", pady=(6, 0))
+        ttk.Button(panel_botones, text=self.t("refrescar"), width=9, command=self._refrescar_archivos).pack(fill="x", pady=(6, 0))
         ttk.Label(panel_botones, text="", style="CardHint.TLabel").pack(fill="x", expand=True)
         self._lbl_conteo = ttk.Label(panel_botones, text="", style="CardHint.TLabel", anchor="center")
         self._lbl_conteo.pack(fill="x", pady=(6, 0))
         ttk.Label(
             panel_botones,
-            text="Ctrl+clic\npara varios;\nvacío = todos",
+            text=self.t("ayuda_seleccion"),
             style="CardHint.TLabel",
             justify="center",
             anchor="n",
@@ -274,13 +422,13 @@ class AppLector(tk.Tk):
 
         # --- Opciones de síntesis ---
         f_opciones = ttk.LabelFrame(
-            panel, text="Opciones de síntesis", style="Tarjeta.TLabelframe", padding=12
+            panel, text=self.t("opciones_sintesis"), style="Tarjeta.TLabelframe", padding=12
         )
         f_opciones.pack(fill="x")
         f_opciones.columnconfigure(1, weight=1)
 
         # Formato (chips)
-        ttk.Label(f_opciones, text="Formato", style="Etiqueta.TLabel").grid(
+        ttk.Label(f_opciones, text=self.t("formato"), style="Etiqueta.TLabel").grid(
             row=0, column=0, sticky="nw", pady=(2, 0)
         )
         fila_formato = ttk.Frame(f_opciones, style="Tarjeta.TFrame")
@@ -296,7 +444,7 @@ class AppLector(tk.Tk):
             ).grid(row=0, column=i, padx=(0, 8))
 
         # Voz
-        ttk.Label(f_opciones, text="Voz", style="Etiqueta.TLabel").grid(
+        ttk.Label(f_opciones, text=self.t("voz"), style="Etiqueta.TLabel").grid(
             row=1, column=0, sticky="nw", pady=(14, 0)
         )
         fila_voz = ttk.Frame(f_opciones, style="Tarjeta.TFrame")
@@ -306,11 +454,11 @@ class AppLector(tk.Tk):
             fila_voz, textvariable=self._var_voz, values=VOCES, width=6, state="readonly"
         ).pack(side="left")
         ttk.Label(
-            fila_voz, text="Modelo supertonic-3", style="CardHint.TLabel"
+            fila_voz, text=self.t("modelo_supertonic"), style="CardHint.TLabel"
         ).pack(side="left", padx=(10, 0))
 
         # Pasos
-        ttk.Label(f_opciones, text="Pasos", style="Etiqueta.TLabel").grid(
+        ttk.Label(f_opciones, text=self.t("pasos"), style="Etiqueta.TLabel").grid(
             row=2, column=0, sticky="nw", pady=(16, 0)
         )
         fila_pasos = ttk.Frame(f_opciones, style="Tarjeta.TFrame")
@@ -330,11 +478,11 @@ class AppLector(tk.Tk):
             fila_pasos, textvariable=self._lbl_valor_steps, style="Valor.TLabel", width=3, anchor="center"
         ).grid(row=0, column=1, padx=(10, 0))
         ttk.Label(
-            fila_pasos, text="más calidad = más lento", style="CardHint.TLabel"
+            fila_pasos, text=self.t("calidad_lento"), style="CardHint.TLabel"
         ).grid(row=0, column=2, padx=(12, 0))
 
         # Velocidad
-        ttk.Label(f_opciones, text="Velocidad", style="Etiqueta.TLabel").grid(
+        ttk.Label(f_opciones, text=self.t("velocidad"), style="Etiqueta.TLabel").grid(
             row=3, column=0, sticky="nw", pady=(14, 0)
         )
         fila_speed = ttk.Frame(f_opciones, style="Tarjeta.TFrame")
@@ -354,11 +502,11 @@ class AppLector(tk.Tk):
             fila_speed, textvariable=self._lbl_valor_speed, style="Valor.TLabel", width=5, anchor="center"
         ).grid(row=0, column=1, padx=(10, 0))
         ttk.Label(
-            fila_speed, text="más rápido / más lento", style="CardHint.TLabel"
+            fila_speed, text=self.t("rapido_lento"), style="CardHint.TLabel"
         ).grid(row=0, column=2, padx=(12, 0))
 
         # --- Registro ---
-        f_log = ttk.LabelFrame(panel, text="Registro", style="Tarjeta.TLabelframe", padding=4)
+        f_log = ttk.LabelFrame(panel, text=self.t("registro"), style="Tarjeta.TLabelframe", padding=4)
         f_log.pack(fill="both", expand=True, pady=(8, 0))
         self._txt = scrolledtext.ScrolledText(f_log, width=40, height=12, state="disabled", wrap="word")
         self._txt.pack(fill="both", expand=True)
@@ -391,15 +539,117 @@ class AppLector(tk.Tk):
         self._contenido.rowconfigure(0, weight=0)
         self._contenido.columnconfigure(0, weight=0, uniform="")
         self._contenido.columnconfigure(1, weight=0, uniform="")
-        self._notebook.add(self._panel_entrada, text="Entrada y salida")
-        self._notebook.add(self._panel_sintesis, text="Síntesis y registro")
+        self._notebook.add(self._panel_entrada, text=self.t("tab_entrada"))
+        self._notebook.add(self._panel_sintesis, text=self.t("tab_sintesis"))
         self._notebook.pack(fill="both", expand=True)
 
     # ------------------------------------------------------------- temas
 
-    def _cambiar_tema(self) -> None:
-        self._aplicar_tema(not self._tema_oscuro)
+    def t(self, clave: str) -> str:
+        """Devuelve el texto traducido para la clave dada en el idioma activo."""
+        return TRADUCCIONES.get(self._idioma, TRADUCCIONES["es"]).get(clave, clave)
+
+    def _abrir_ajustes(self) -> None:
+        """Abre (o trae al frente) la ventana flotante de configuración."""
+        if self._ventana_ajustes is not None and self._ventana_ajustes.winfo_exists():
+            self._ventana_ajustes.deiconify()
+            self._ventana_ajustes.lift()
+            return
+
+        ventana = tk.Toplevel(self)
+        ventana.title(self.t("ajustes"))
+        ventana.transient(self)
+        ventana.resizable(False, False)
+        self._ventana_ajustes = ventana
+        ventana.protocol("WM_DELETE_WINDOW", self._cerrar_ajustes)
+
+        marco = ttk.Frame(ventana, padding=16)
+        marco.pack(fill="both", expand=True)
+
+        ttk.Label(marco, text=self.t("ajustes"), style="Titulo.TLabel").pack(anchor="w", pady=(0, 12))
+
+        # --- Tema ---
+        f_tema = ttk.LabelFrame(marco, text=self.t("tema"), style="Tarjeta.TLabelframe", padding=10)
+        f_tema.pack(fill="x")
+        var_tema = tk.StringVar(value="oscuro" if self._tema_oscuro else "claro")
+        self._var_tema_ajustes = var_tema
+        for valor, etiqueta in (("claro", self.t("claro")), ("oscuro", self.t("oscuro"))):
+            ttk.Radiobutton(
+                f_tema,
+                text=etiqueta,
+                variable=var_tema,
+                value=valor,
+                command=self._aplicar_tema_desde_ajustes,
+            ).pack(anchor="w", pady=2)
+
+        # --- Idioma ---
+        f_idioma = ttk.LabelFrame(marco, text=self.t("idioma"), style="Tarjeta.TLabelframe", padding=10)
+        f_idioma.pack(fill="x", pady=(10, 0))
+        var_idioma = tk.StringVar(value=IDIOMAS[self._idioma])
+        self._var_idioma_ajustes = var_idioma
+        ttk.Combobox(
+            f_idioma,
+            textvariable=var_idioma,
+            values=list(IDIOMAS.values()),
+            state="readonly",
+            width=12,
+        ).pack(anchor="w")
+        var_idioma.trace_add("write", self._aplicar_idioma_desde_ajustes)
+
+        f_acciones = ttk.Frame(marco)
+        f_acciones.pack(fill="x", pady=(14, 0))
+        ttk.Button(f_acciones, text=self.t("cerrar"), command=self._cerrar_ajustes).pack(side="right")
+
+        # Centrar la ventana sobre la principal y teñirla con el tema actual
+        ventana.configure(bg=self._paleta["fondo"])
+        ventana.update_idletasks()
+        ancho = max(ventana.winfo_reqwidth(), 320)
+        alto = ventana.winfo_reqheight()
+        x = self.winfo_rootx() + (self.winfo_width() - ancho) // 2
+        y = self.winfo_rooty() + max(0, (self.winfo_height() - alto) // 3)
+        ventana.geometry(f"{ancho}x{alto}+{max(x, 0)}+{y}")
+
+    def _aplicar_tema_desde_ajustes(self) -> None:
+        self._aplicar_tema(self._var_tema_ajustes.get() == "oscuro")
         self._guardar_preferencias()
+
+    def _aplicar_idioma_desde_ajustes(self, *_args) -> None:
+        nombre = self._var_idioma_ajustes.get()
+        idioma = next((c for c, n in IDIOMAS.items() if n == nombre), self._idioma)
+        if idioma == self._idioma:
+            return
+        self._idioma = idioma
+        self._guardar_preferencias()
+        self._reconstruir_ui()
+
+    def _cerrar_ajustes(self) -> None:
+        if self._ventana_ajustes is not None:
+            self._ventana_ajustes.destroy()
+            self._ventana_ajustes = None
+
+    def _reconstruir_ui(self) -> None:
+        """Reconstruye la interfaz (al cambiar idioma), preservando valores y log."""
+        prefs = self._preferencias_actuales()
+        log_texto = ""
+        if self._txt is not None and self._txt.winfo_exists():
+            self._txt.config(state="normal")
+            log_texto = self._txt.get("1.0", "end-1c")
+            self._txt.config(state="disabled")
+        self._construir_widgets()
+        self._aplicar_preferencias(prefs)
+        self._aplicar_tema(self._tema_oscuro)
+        if log_texto:
+            self._txt.config(state="normal")
+            self._txt.insert("end", log_texto)
+            self._txt.config(state="disabled")
+            self._txt.see("end")
+        self._refrescar_archivos()
+        self.title(self.t("ventana_titulo"))
+        if self.winfo_width() >= UMBRAL_ANCHO and not self._modo_ancho:
+            self._modo_columnas()
+        if self._ventana_ajustes is not None and self._ventana_ajustes.winfo_exists():
+            self._cerrar_ajustes()
+            self._abrir_ajustes()
 
     def _aplicar_tema(self, oscuro: bool) -> None:
         self._tema_oscuro = oscuro
@@ -520,7 +770,7 @@ class AppLector(tk.Tk):
             foreground=[("disabled", c["texto_secundario"])],
         )
 
-        # Botón estándar (contorno): Examinar…, Todo/Nada/Refrescar, tema, cancelar
+        # Botón estándar (contorno): Examinar…, Todo/Nada/Refrescar, ajustes, cancelar
         estilo.configure(
             "TButton",
             background=c["superficie"],
@@ -557,6 +807,18 @@ class AppLector(tk.Tk):
         )
         estilo.map(
             "TCheckbutton",
+            background=[("active", c["superficie"])],
+            indicatorcolor=[("selected", c["primario"]), ("!selected", c["superficie"])],
+        )
+        # Radiobutton (temas en la ventana de ajustes)
+        estilo.configure(
+            "TRadiobutton",
+            background=c["superficie"],
+            foreground=c["texto"],
+            focuscolor=c["fondo"],
+        )
+        estilo.map(
+            "TRadiobutton",
             background=[("active", c["superficie"])],
             indicatorcolor=[("selected", c["primario"]), ("!selected", c["superficie"])],
         )
@@ -610,8 +872,8 @@ class AppLector(tk.Tk):
 
         self.configure(bg=c["fondo"])
         self._estilizar_no_ttk()
-        if hasattr(self, "_btn_tema"):
-            self._btn_tema.config(text="Modo claro" if oscuro else "Modo oscuro")
+        if self._ventana_ajustes is not None and self._ventana_ajustes.winfo_exists():
+            self._ventana_ajustes.configure(bg=c["fondo"])
 
     def _estilizar_no_ttk(self) -> None:
         c = self._paleta
@@ -673,23 +935,29 @@ class AppLector(tk.Tk):
         total = self.lista.size()
         seleccionados = len(self.lista.curselection())
         if seleccionados:
-            self._lbl_conteo.config(text=f"{seleccionados}/{total} seleccionados")
+            self._lbl_conteo.config(
+                text=self.t("conteo_seleccionados").format(sel=seleccionados, total=total)
+            )
+        elif total:
+            self._lbl_conteo.config(text=self.t("conteo_archivos").format(total=total))
         else:
-            self._lbl_conteo.config(text=f"{total} archivos" if total else "Sin archivos")
+            self._lbl_conteo.config(text=self.t("conteo_sin"))
+
+    def _preferencias_actuales(self) -> Dict[str, object]:
+        return {
+            "tema_oscuro": self._tema_oscuro,
+            "idioma": self._idioma,
+            "voz": self._var_voz.get(),
+            "steps": int(round(self._var_steps.get())),
+            "speed": float(self._var_speed.get()),
+            "formatos": [f for f in FORMATOS_NATIVOS if self._var_formato[f].get()],
+            "carpeta_in": self._var_carpeta_in.get(),
+            "carpeta_out": self._var_carpeta_out.get(),
+        }
 
     def _guardar_preferencias(self) -> None:
         try:
-            self._repositorio_preferencias.guardar(
-                {
-                    "tema_oscuro": self._tema_oscuro,
-                    "voz": self._var_voz.get(),
-                    "steps": int(round(self._var_steps.get())),
-                    "speed": float(self._var_speed.get()),
-                    "formatos": [f for f in FORMATOS_NATIVOS if self._var_formato[f].get()],
-                    "carpeta_in": self._var_carpeta_in.get(),
-                    "carpeta_out": self._var_carpeta_out.get(),
-                }
-            )
+            self._repositorio_preferencias.guardar(self._preferencias_actuales())
         except Exception:
             logging.getLogger("lector").exception("No se pudieron guardar las preferencias")
 
@@ -740,22 +1008,20 @@ class AppLector(tk.Tk):
 
         formatos = [f for f in FORMATOS_NATIVOS if self._var_formato[f].get()]
         if not formatos:
-            self._mostrar_snackbar("Elegí al menos un formato de salida.", "error")
-            log.warning("No se pudo iniciar: no se eligió ningún formato de salida.")
+            self._mostrar_snackbar(self.t("snackbar_formato"), "error")
+            log.warning(self.t("log_formato_no_ok"))
             return
 
         self._seleccion = [self._archivos[i] for i in self.lista.curselection()]
         if not self._seleccion:
             self._seleccion = list(self._archivos)
         if not self._seleccion:
-            self._mostrar_snackbar("No hay archivos .md en la carpeta de entrada.", "error")
-            log.warning("No se pudo iniciar: la carpeta de entrada no tiene archivos .md.")
+            self._mostrar_snackbar(self.t("snackbar_sin_md"), "error")
+            log.warning(self.t("log_sin_md"))
             return
 
         log.info(
-            "▶ Inicio: %d archivo(s) seleccionado(s) de %d disponible(s).",
-            len(self._seleccion),
-            len(self._archivos),
+            self.t("log_inicio").format(sel=len(self._seleccion), total=len(self._archivos))
         )
         self._set_ejecutando(True)
         self._cancelar.clear()
@@ -767,8 +1033,8 @@ class AppLector(tk.Tk):
             return
         self._cancelar.set()
         self._btn_cancelar.config(state="disabled")
-        self._lbl_estado.config(text="Cancelando (exporta lo generado hasta ahora)…")
-        log.info("■ Cancelación solicitada: se exporta lo generado hasta el momento.")
+        self._lbl_estado.config(text=self.t("estado_cancelando"))
+        log.info(self.t("log_cancelar"))
 
     # ------------------------------------------------------------- worker
 
@@ -783,10 +1049,14 @@ class AppLector(tk.Tk):
             self._repositorio.crear_carpetas_si_no_existen(str(salida))
 
             log.info("=" * 60)
-            log.info("  CONFIGURACIÓN")
-            log.info("    Voz: %s   Pasos: %d   Velocidad: %.2fx", voz, steps, speed)
-            log.info("    Formatos: %s", ", ".join(f.upper() for f in formatos))
-            log.info("    Salida: %s", salida)
+            log.info(self.t("log_config_titulo"))
+            log.info(
+                self.t("log_config_voz").format(voz=voz, pasos=steps, vel=f"{speed:.2f}x")
+            )
+            log.info(
+                self.t("log_config_formatos").format(formatos=", ".join(f.upper() for f in formatos))
+            )
+            log.info(self.t("log_config_salida").format(salida=salida))
             log.info("=" * 60)
 
             use_case = self._fabrica_use_case(voz)
@@ -795,7 +1065,7 @@ class AppLector(tk.Tk):
                 if self._cancelar.is_set():
                     break
                 self._cola.put(("capitulo", i, total_caps, ruta.name))
-                log.info("▶ Archivo %d/%d: %s", i, total_caps, ruta.name)
+                log.info(self.t("log_archivo").format(i=i, n=total_caps, nombre=ruta.name))
                 use_case.procesar(
                     Capitulo(ruta),
                     salida / ruta.stem,
@@ -805,7 +1075,7 @@ class AppLector(tk.Tk):
                     on_progreso=self._cb_progreso,
                     debe_detenerse=self._cb_detenerse,
                 )
-                log.info("✔ Archivo %d/%d terminado.", i, total_caps)
+                log.info(self.t("log_archivo_fin").format(i=i, n=total_caps))
             elapsed = time.monotonic() - inicio
             self._cola.put(("fin", not self._cancelar.is_set(), total_caps, elapsed))
         except Exception as exc:
@@ -816,7 +1086,9 @@ class AppLector(tk.Tk):
         self._cola.put(("progreso", actual, total))
         paso = max(1, total // 20)
         if actual % paso == 0 or actual == total:
-            self._cola.put(("log", "info", f"      Segmento {actual}/{total} sintetizado…"))
+            self._cola.put(
+                ("log", "info", self.t("log_segmento").format(actual=actual, total=total))
+            )
 
     def _cb_detenerse(self) -> bool:
         return self._cancelar.is_set()
@@ -838,7 +1110,7 @@ class AppLector(tk.Tk):
             self._escribir_log(texto, nivel)
         elif tipo == "capitulo":
             _, i, n, nombre = msg
-            self._lbl_estado.config(text=f"Archivo {i} de {n}: {nombre}")
+            self._lbl_estado.config(text=self.t("estado_archivo").format(i=i, n=n, nombre=nombre))
             self._barra.config(value=0)
             self._lbl_porcentaje.config(text="0%")
         elif tipo == "progreso":
@@ -846,7 +1118,7 @@ class AppLector(tk.Tk):
             pct = actual / total * 100 if total else 0
             self._barra.config(value=pct)
             self._lbl_porcentaje.config(text=f"{pct:.0f}%")
-            self._lbl_estado.config(text=f"{actual}/{total} segmentos sintetizados")
+            self._lbl_estado.config(text=self.t("estado_segmentos").format(actual=actual, total=total))
         elif tipo == "fin":
             _, exito, n, elapsed = msg
             self._set_ejecutando(False)
@@ -854,35 +1126,31 @@ class AppLector(tk.Tk):
             if exito:
                 self._barra.config(value=100)
                 self._lbl_porcentaje.config(text="100%")
-                self._lbl_estado.config(text=f"Listo: {n} archivo(s) en {texto_elapsed}.")
-                self._mostrar_snackbar(f"Se procesaron {n} archivo(s) en {texto_elapsed}.")
+                self._lbl_estado.config(text=self.t("estado_listo_n").format(n=n, tiempo=texto_elapsed))
+                self._mostrar_snackbar(self.t("snackbar_procesado").format(n=n, tiempo=texto_elapsed))
                 log.info("=" * 60)
-                log.info("✔ PROCESAMIENTO COMPLETADO: %d archivo(s) en %s.", n, texto_elapsed)
+                log.info(self.t("log_completado").format(n=n, tiempo=texto_elapsed))
                 log.info("=" * 60)
             else:
-                self._lbl_estado.config(text="Cancelado por el usuario.")
-                self._mostrar_snackbar("Se exportó lo generado hasta el momento.")
-                log.warning(
-                    "✖ Procesamiento cancelado por el usuario tras %s.",
-                    texto_elapsed,
-                )
+                self._lbl_estado.config(text=self.t("estado_cancelado"))
+                self._mostrar_snackbar(self.t("snackbar_exportado"))
+                log.warning(self.t("log_cancelado").format(tiempo=texto_elapsed))
         elif tipo == "error":
             _, texto = msg
             self._set_ejecutando(False)
-            self._lbl_estado.config(text="Error.")
+            self._lbl_estado.config(text=self.t("estado_error"))
             self._mostrar_snackbar(texto, "error")
-            log.error("✖ ERROR: %s", texto)
+            log.error(self.t("log_error").format(texto=texto))
 
-    @staticmethod
-    def _formatear_tiempo(segundos: float) -> str:
+    def _formatear_tiempo(self, segundos: float) -> str:
         total = int(segundos)
         if total < 60:
-            return f"{total} s"
+            return self.t("tiempo_seg").format(total=total)
         minutos, seg = divmod(total, 60)
         if minutos < 60:
-            return f"{minutos} min {seg} s"
+            return self.t("tiempo_min_seg").format(min=minutos, seg=seg)
         horas, min_ = divmod(minutos, 60)
-        return f"{horas} h {min_} min"
+        return self.t("tiempo_hora_min").format(horas=horas, min=min_)
 
     def _escribir_log(self, texto: str, nivel: str = "info") -> None:
         self._txt.config(state="normal")
