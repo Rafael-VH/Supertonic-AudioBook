@@ -41,7 +41,7 @@ Wrapper alrededor de `supertonic.TTS` que satisface el contrato `MotorTTS`. Es l
 | Constructor | `MotorSupertonic(voz="M1")` — llama `configurar_entorno()`, guarda la voz, `_engine=None`, `_style=None` |
 | Validación de voz | En el primer uso: `engine.get_voice_style(voice_name=voz)`; si falla, `ValueError` con mensaje que sugiere `engine.list_voices()` |
 | Propiedades | `engine` y `style` exponen el estado lazy (aseguran inicialización y lanzan `assert`) |
-| `sintetizar(texto, *, steps, speed)` | Llama `engine.synthesize(texto, voice_style=style, lang="es", total_steps=steps, speed=speed)`. Devuelve `np.atleast_1d(wav.squeeze()).astype(np.float32)` |
+| `sintetizar(texto, *, steps, speed, lang=DEFAULT_LANG)` | Llama `engine.synthesize(texto, voice_style=style, lang=lang, total_steps=steps, speed=speed)`. Devuelve `np.atleast_1d(wav.squeeze()).astype(np.float32)` |
 | Tolerancia a fallos | Un error de síntesis → `log.error` y devuelve array vacío (no aborta el capítulo) |
 | Silencios | Fragmento de 0 muestras → warning y array vacío |
 

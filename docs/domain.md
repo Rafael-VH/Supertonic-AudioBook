@@ -21,7 +21,7 @@ Interfaces que el dominio necesita del mundo exterior. Las implementaciones vive
 ### `repositories/motor_tts.py` — `MotorTTS`
 
 ```python
-def sintetizar(self, texto: str, *, steps: int, speed: float) -> np.ndarray
+def sintetizar(self, texto: str, *, steps: int, speed: float, lang: str = DEFAULT_LANG) -> np.ndarray
 ```
 
 Convierte texto a audio. Devuelve un array numpy 1D `float32` con las muestras; **vacío** si no se generó audio (el caso de uso lo omite y sigue).
@@ -31,10 +31,12 @@ Constantes de producto (las que decide el negocio):
 | Constante | Valor | Significado |
 |-----------|-------|-------------|
 | `DEFAULT_VOICE` | `"M1"` | Voz por defecto del producto |
+| `DEFAULT_LANG` | `"es"` | Idioma de síntesis por defecto (código de `LANGUAGES_VOZ`) |
+| `LANGUAGES_VOZ` | 32 códigos | Idiomas soportados por supertonic-3 (31 + `"na"` = texto sin idioma) |
 | `DEFAULT_TTS_STEPS` | `5` | Pasos de inferencia (más = mejor calidad, más lento) |
 | `DEFAULT_SPEED` | `1.1` | Velocidad de habla (`1.0` = normal) |
 
-> Estas constantes las consumen CLI y GUI para los valores por defecto de sus controles. Si cambiás la voz/steps/speed por defecto, se hace ACÁ, no en presentación.
+> Estas constantes las consumen CLI y GUI para los valores por defecto de sus controles. Si cambiás la voz/idioma/steps/speed por defecto, se hace ACÁ, no en presentación.
 
 ### `repositories/repositorio_archivos.py` — `RepositorioArchivos`
 

@@ -50,15 +50,16 @@ Entrada: `AppLector(*, fabrica_use_case, repositorio, carpeta_base, repositorio_
 | Voz | Combobox readonly |
 | Pasos | Slider 5–12 |
 | Velocidad | Slider 0.7–2.0 |
+| Idioma de la voz | Combobox readonly con los 32 idiomas de `LANGUAGES_VOZ` (`IDIOMAS_VOZ_NATIVOS` muestra el nombre nativo; `na` aparece como "Auto (sin idioma)"). Se persiste en la clave `lang_voz` |
 | Acciones | `▶ Procesar` y `■ Cancelar` (deshabilitado mientras no procesa) |
 | Progreso | `ttk.Progressbar` + porcentaje + etiqueta de estado |
 | Feedback | Snackbar flotante estilo Material (`_mostrar_snackbar`) en lugar de diálogos modales |
-| Log | `ScrolledText` con niveles coloreados; `logging` raíz en `INFO`. Registra: config al iniciar (voz/pasos/velocidad/formatos/salida), cada capítulo (`▶ N/M`), progreso de segmentos (máx. ~20 líneas por capítulo), fin por capítulo (`✔`), cancelación (`■`), errores con traceback y tiempo total |
+| Log | `ScrolledText` con niveles coloreados; `logging` raíz en `INFO`. Registra: config al iniciar (voz/pasos/velocidad/idioma de la voz/formatos/salida), cada capítulo (`▶ N/M`), progreso de segmentos (máx. ~20 líneas por capítulo), fin por capítulo (`✔`), cancelación (`■`), errores con traceback y tiempo total |
 
 Preferencias persistentes (contrato `RepositorioPreferencias` de `domain/repositories`, implementado como JSON en `data/repositories/repositorio_preferencias.py`):
 
 - Se guardan al alternar tema, al cambiar idioma, al iniciar un procesamiento y al cerrar la ventana.
-- Persisten: tema, idioma, voz, pasos, velocidad, formatos y carpetas de entrada/salida.
+- Persisten: tema, idioma, voz, pasos, velocidad, idioma de la voz, formatos y carpetas de entrada/salida.
 - Se inyectan desde `main.py` (`PreferenciasJSONLocal(CARPETA_BASE / "preferencias.json")`).
 - Cambiar idioma reconstruye la UI (`_reconstruir_ui`) preservando valores, log, tema y modo responsive.
 

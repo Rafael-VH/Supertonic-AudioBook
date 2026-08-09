@@ -11,7 +11,7 @@ import numpy as np
 from supertonic import TTS
 
 from data.config import configurar_entorno
-from domain.repositories.motor_tts import DEFAULT_VOICE
+from domain.repositories.motor_tts import DEFAULT_LANG, DEFAULT_VOICE
 
 log = logging.getLogger("lector")
 
@@ -69,13 +69,21 @@ class MotorSupertonic:
         *,
         steps: int,
         speed: float,
+        lang: str = DEFAULT_LANG,
     ) -> np.ndarray:
-        """Convierte texto a audio (ver contrato ``MotorTTS``)."""
+        """Convierte texto a audio (ver contrato ``MotorTTS``).
+
+        Args:
+            texto: Texto a sintetizar.
+            steps: Pasos de inferencia (más = mejor calidad).
+            speed: Velocidad de habla.
+            lang: Idioma de la voz (código de ``LANGUAGES_VOZ``).
+        """
         try:
             wav, _ = self.engine.synthesize(
                 texto,
                 voice_style=self.style,
-                lang="es",
+                lang=lang,
                 total_steps=steps,
                 speed=speed,
             )

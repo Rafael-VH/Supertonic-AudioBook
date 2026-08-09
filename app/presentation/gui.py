@@ -17,7 +17,13 @@ from tkinter import filedialog, scrolledtext, ttk
 from typing import Callable, Dict, List
 
 from domain.entities.capitulo import Capitulo
-from domain.repositories.motor_tts import DEFAULT_SPEED, DEFAULT_TTS_STEPS, DEFAULT_VOICE
+from domain.repositories.motor_tts import (
+    DEFAULT_LANG,
+    DEFAULT_SPEED,
+    DEFAULT_TTS_STEPS,
+    DEFAULT_VOICE,
+    LANGUAGES_VOZ,
+)
 from domain.repositories.repositorio_archivos import RepositorioArchivos
 from domain.repositories.repositorio_preferencias import RepositorioPreferencias
 from domain.use_cases.formato import FORMATOS_NATIVOS
@@ -27,6 +33,18 @@ log = logging.getLogger("lector")
 
 VOCES: tuple = ("M1", "M2", "M3", "M4", "M5", "F1", "F2", "F3", "F4", "F5")
 """Voces integradas del modelo supertonic-3 (M1-M5, F1-F5)."""
+
+IDIOMAS_VOZ_NATIVOS: dict = {
+    "en": "English", "es": "Español", "fr": "Français", "de": "Deutsch",
+    "it": "Italiano", "pt": "Português", "nl": "Nederlands", "pl": "Polski",
+    "ru": "Русский", "uk": "Українська", "tr": "Türkçe", "ar": "العربية",
+    "hi": "हिन्दी", "ko": "한국어", "ja": "日本語", "bg": "Български",
+    "cs": "Čeština", "da": "Dansk", "el": "Ελληνικά", "et": "Eesti",
+    "fi": "Suomi", "hr": "Hrvatski", "hu": "Magyar", "id": "Bahasa Indonesia",
+    "lt": "Lietuvių", "lv": "Latviešu", "ro": "Română", "sk": "Slovenčina",
+    "sl": "Slovenščina", "sv": "Svenska", "vi": "Tiếng Việt",
+}
+"""Nombre nativo de cada idioma de voz (``na`` se traduce con la clave de UI)."""
 
 UMBRAL_ANCHO = 900
 """Ancho mínimo de ventana para mostrar los paneles lado a lado (responsive)."""
@@ -102,6 +120,8 @@ TRADUCCIONES: dict = {
         "calidad_lento": "más calidad = más lento",
         "velocidad": "Velocidad",
         "rapido_lento": "más rápido / más lento",
+        "idioma_voz": "Idioma de la voz",
+        "idioma_voz_auto": "Auto (sin idioma)",
         "registro": "Registro",
         "btn_procesar": "▶  Procesar",
         "btn_cancelar": "■  Cancelar",
@@ -125,6 +145,7 @@ TRADUCCIONES: dict = {
         "log_cancelar": "■ Cancelación solicitada: se exporta lo generado hasta el momento.",
         "log_config_titulo": "  CONFIGURACIÓN",
         "log_config_voz": "    Voz: {voz}   Pasos: {pasos}   Velocidad: {vel}",
+        "log_config_lang": "    Idioma de la voz: {lang}",
         "log_config_formatos": "    Formatos: {formatos}",
         "log_config_salida": "    Salida: {salida}",
         "log_archivo": "▶ Archivo {i}/{n}: {nombre}",
@@ -164,6 +185,8 @@ TRADUCCIONES: dict = {
         "calidad_lento": "more quality = slower",
         "velocidad": "Speed",
         "rapido_lento": "faster / slower",
+        "idioma_voz": "Voice language",
+        "idioma_voz_auto": "Auto (no language)",
         "registro": "Log",
         "btn_procesar": "▶  Process",
         "btn_cancelar": "■  Cancel",
@@ -187,6 +210,7 @@ TRADUCCIONES: dict = {
         "log_cancelar": "■ Cancellation requested: what was generated so far will be exported.",
         "log_config_titulo": "  CONFIGURATION",
         "log_config_voz": "    Voice: {voz}   Steps: {pasos}   Speed: {vel}",
+        "log_config_lang": "    Voice language: {lang}",
         "log_config_formatos": "    Formats: {formatos}",
         "log_config_salida": "    Output: {salida}",
         "log_archivo": "▶ File {i}/{n}: {nombre}",
@@ -505,6 +529,21 @@ class AppLector(tk.Tk):
             fila_speed, text=self.t("rapido_lento"), style="CardHint.TLabel"
         ).grid(row=0, column=2, padx=(12, 0))
 
+        # Idioma de la voz
+        ttk.Label(f_opciones, text=self.t("idioma_voz"), style="Etiqueta.TLabel").grid(
+            row=4, column=0, sticky="nw", pady=(14, 0)
+        )
+        fila_lang = ttk.Frame(f_opciones, style="Tarjeta.TFrame")
+        fila_lang.grid(row=4, column=1, sticky="w", padx=(12, 0), pady=(10, 0))
+        self._var_lang_voz = tk.StringVar(value=self._nombre_idioma_voz(DEFAULT_LANG))
+        ttk.Combobox(
+            fila_lang,
+            textvariable=self._var_lang_voz,
+            values=self._nombres_idiomas_voz(),
+            state="readonly",
+            width=16,
+        ).pack(side="left")
+
         # --- Registro ---
         f_log = ttk.LabelFrame(panel, text=self.t("registro"), style="Tarjeta.TLabelframe", padding=4)
         f_log.pack(fill="both", expand=True, pady=(8, 0))
@@ -548,6 +587,35 @@ class AppLector(tk.Tk):
     def t(self, clave: str) -> str:
         """Devuelve el texto traducido para la clave dada en el idioma activo."""
         return TRADUCCIONES.get(self._idioma, TRADUCCIONES["es"]).get(clave, clave)
+
+    def _nombre_idioma_voz(self, codigo: str) -> str:
+        """Nombre visible del idioma de voz (nativo; ``na`` usa la clave de UI)."""
+        if codigo == "na":
+            return self.t("idioma_voz_auto")
+        return IDIOMAS_VOZ_NATIVOS.get(codigo, codigo)
+
+    def _nombres_idiomas_voz(self) -> List[str]:
+        return [self._nombre_idioma_voz(codigo) for codigo in LANGUAGES_VOZ]
+
+    def _codigo_idioma_voz(self) -> str:
+        """Código del idioma seleccionado (inverso de ``_nombre_idioma_voz``).
+
+        Tolerante al idioma de la UI: el combo puede mostrar el nombre de
+        ``na`` en el idioma anterior durante una reconstrucción, así que
+        acepta cualquiera de las traducciones conocidas.
+        """
+        nombre = self._var_lang_voz.get()
+        etiquetas_na = {
+            TRADUCCIONES.get(idioma, TRADUCCIONES["es"])["idioma_voz_auto"]
+            for idioma in IDIOMAS
+        }
+        for codigo in LANGUAGES_VOZ:
+            if codigo == "na":
+                if nombre in etiquetas_na:
+                    return codigo
+            elif nombre == codigo or IDIOMAS_VOZ_NATIVOS.get(codigo) == nombre:
+                return codigo
+        return DEFAULT_LANG
 
     def _abrir_ajustes(self) -> None:
         """Abre (o trae al frente) la ventana flotante de configuración."""
@@ -950,6 +1018,7 @@ class AppLector(tk.Tk):
             "voz": self._var_voz.get(),
             "steps": int(round(self._var_steps.get())),
             "speed": float(self._var_speed.get()),
+            "lang_voz": self._codigo_idioma_voz(),
             "formatos": [f for f in FORMATOS_NATIVOS if self._var_formato[f].get()],
             "carpeta_in": self._var_carpeta_in.get(),
             "carpeta_out": self._var_carpeta_out.get(),
@@ -972,6 +1041,8 @@ class AppLector(tk.Tk):
         if isinstance(prefs.get("speed"), (int, float)):
             self._var_speed.set(max(0.7, min(2.0, float(prefs["speed"]))))
             self._lbl_valor_speed.set(f"{self._var_speed.get():.2f}x")
+        if isinstance(prefs.get("lang_voz"), str) and prefs["lang_voz"] in LANGUAGES_VOZ:
+            self._var_lang_voz.set(self._nombre_idioma_voz(prefs["lang_voz"]))
         if isinstance(prefs.get("formatos"), list):
             for formato in FORMATOS_NATIVOS:
                 self._var_formato[formato].set(formato in prefs["formatos"])
@@ -1045,6 +1116,7 @@ class AppLector(tk.Tk):
             voz = self._var_voz.get()
             steps = int(round(self._var_steps.get()))
             speed = float(self._var_speed.get())
+            lang = self._codigo_idioma_voz()
             salida = Path(self._var_carpeta_out.get())
             self._repositorio.crear_carpetas_si_no_existen(str(salida))
 
@@ -1053,6 +1125,7 @@ class AppLector(tk.Tk):
             log.info(
                 self.t("log_config_voz").format(voz=voz, pasos=steps, vel=f"{speed:.2f}x")
             )
+            log.info(self.t("log_config_lang").format(lang=lang))
             log.info(
                 self.t("log_config_formatos").format(formatos=", ".join(f.upper() for f in formatos))
             )
@@ -1071,6 +1144,7 @@ class AppLector(tk.Tk):
                     salida / ruta.stem,
                     steps=steps,
                     speed=speed,
+                    lang=lang,
                     formatos=formatos,
                     on_progreso=self._cb_progreso,
                     debe_detenerse=self._cb_detenerse,

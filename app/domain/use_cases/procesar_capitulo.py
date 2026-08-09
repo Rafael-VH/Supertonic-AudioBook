@@ -16,7 +16,7 @@ import numpy as np
 
 from domain.entities.capitulo import Capitulo
 from domain.repositories.exportador_audio import ExportadorAudio
-from domain.repositories.motor_tts import MotorTTS
+from domain.repositories.motor_tts import DEFAULT_LANG, MotorTTS
 from domain.repositories.repositorio_archivos import RepositorioArchivos
 from domain.use_cases.limpiar_markdown import limpiar_markdown
 from domain.use_cases.segmentar_texto import segmentar_texto
@@ -58,6 +58,7 @@ class ProcesarCapitulo:
         steps: int,
         speed: float,
         formatos: List[str],
+        lang: str = DEFAULT_LANG,
         on_progreso: Optional[Callable[[int, int], None]] = None,
         debe_detenerse: Optional[Callable[[], bool]] = None,
     ) -> None:
@@ -69,6 +70,7 @@ class ProcesarCapitulo:
             steps: Pasos de inferencia para el TTS.
             speed: Velocidad de habla.
             formatos: Formatos de salida (lista normalizada).
+            lang: Idioma de la voz (código de ``LANGUAGES_VOZ``).
             on_progreso: Callback ``(procesados, total)`` por cada segmento.
             debe_detenerse: Callback que, si devuelve ``True``, aborta la
                 síntesis entre segmentos y exporta lo generado hasta ahora.
@@ -119,7 +121,7 @@ class ProcesarCapitulo:
                     cancelado = True
                     break
 
-                wav = self._motor.sintetizar(texto, steps=steps, speed=speed)
+                wav = self._motor.sintetizar(texto, steps=steps, speed=speed, lang=lang)
                 if on_progreso is not None:
                     on_progreso(procesados, total)
                 if wav.size == 0:
