@@ -32,20 +32,32 @@ Comportamiento:
 
 ## `gui.py` — Interfaz gráfica (Tkinter)
 
-Entrada: `AppLector(*, fabrica_use_case, repositorio, carpeta_base)`. Es un `tk.Tk` con la ventana completa.
+Entrada: `AppLector(*, fabrica_use_case, repositorio, carpeta_base, repositorio_preferencias)`. Es un `tk.Tk` con la ventana completa.
 
 | Elemento | Detalle |
 |----------|---------|
 | `VOCES` | `("M1".."M5", "F1".."F5")` — 10 voces del modelo |
-| Carpeta de entrada | Entry + botón "Examinar…", lista multiselección (Ctrl+clic), botones `Todo` / `Nada` / `Refrescar`; vacío = todos |
-| Carpeta de salida | Entry + "Examinar…" |
+| Tema | Claro/oscuro con paleta Material Design 3 (`PALETA_CLARA`/`PALETA_OSCURA`), alternable con el botón de la cabecera |
+| Cabecera | Título + botón alternador de tema |
+| Pestañas | `ttk.Notebook`: "Entrada y salida" (carpetas + lista) y "Síntesis y registro" (opciones + log) |
+| Layout responsive | Bajo `UMBRAL_ANCHO` (900 px) usa pestañas; a partir de ahí muestra ambos paneles lado a lado en columnas (`_modo_columnas`/`_modo_pestanas`) |
+| Carpeta de origen | Entry + "Examinar…", en tarjeta propia separada de la lista |
+| Archivos Encontrados | Lista multiselección (Ctrl+clic), botones `Todo` / `Nada` / `Refrescar` y contador; vacío = todos |
+| Salida de audio | Entry + "Examinar…" (arriba, en el tab "Entrada y salida") |
 | Formatos | Checkboxes `WAV`/`FLAC`/`OGG`/`MP3`; `wav` y `mp3` marcados por defecto. Obliga a elegir al menos uno |
 | Voz | Combobox readonly |
 | Pasos | Slider 5–12 |
 | Velocidad | Slider 0.7–2.0 |
 | Acciones | `▶ Procesar` y `■ Cancelar` (deshabilitado mientras no procesa) |
-| Progreso | `ttk.Progressbar` + etiqueta de estado |
-| Log | `ScrolledText` con niveles coloreados |
+| Progreso | `ttk.Progressbar` + porcentaje + etiqueta de estado |
+| Feedback | Snackbar flotante estilo Material (`_mostrar_snackbar`) en lugar de diálogos modales |
+| Log | `ScrolledText` con niveles coloreados; `logging` raíz en `INFO`. Registra: config al iniciar (voz/pasos/velocidad/formatos/salida), cada capítulo (`▶ N/M`), progreso de segmentos (máx. ~20 líneas por capítulo), fin por capítulo (`✔`), cancelación (`■`), errores con traceback y tiempo total |
+
+Preferencias persistentes (contrato `RepositorioPreferencias` de `domain/repositories`, implementado como JSON en `data/repositories/repositorio_preferencias.py`):
+
+- Se guardan al alternar tema, al iniciar un procesamiento y al cerrar la ventana.
+- Persisten: tema, voz, pasos, velocidad, formatos y carpetas de entrada/salida.
+- Se inyectan desde `main.py` (`PreferenciasJSONLocal(CARPETA_BASE / "preferencias.json")`).
 
 Arquitectura interna de la GUI (no se congela):
 

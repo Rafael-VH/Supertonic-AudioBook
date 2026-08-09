@@ -23,6 +23,7 @@ from data.config import (
 from data.repositories.exportador_audio import ExportadorAudioSoundfile
 from data.repositories.motor_tts import MotorSupertonic
 from data.repositories.repositorio_archivos import RepositorioArchivosLocal
+from data.repositories.repositorio_preferencias import PreferenciasJSONLocal
 from domain.repositories.motor_tts import MotorTTS
 from domain.use_cases.procesar_capitulo import ProcesarCapitulo
 
@@ -64,6 +65,7 @@ def main() -> None:
         fabrica_use_case=fabrica_use_case,
         repositorio=RepositorioArchivosLocal(),
         carpeta_base=CARPETA_BASE,
+        repositorio_preferencias=PreferenciasJSONLocal(CARPETA_BASE / "preferencias.json"),
     )
     app.mainloop()
 

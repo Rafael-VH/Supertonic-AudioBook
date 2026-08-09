@@ -14,6 +14,9 @@ audio/
 archivos/
 modelo/
 
+# Preferencias de la interfaz (generadas en runtime)
+app/preferencias.json
+
 # Entorno local
 .atl/
 .venv/

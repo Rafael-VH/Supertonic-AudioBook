@@ -17,7 +17,7 @@ app/
 │   └── use_cases/           #   Pipeline: limpiar, segmentar, procesar, formatos
 ├── data/                    # Implementaciones concretas del mundo exterior
 │   ├── config.py            #   Constantes técnicas + configurar_entorno()
-│   └── repositories/        #   MotorSupertonic, RepositorioArchivosLocal, ExportadorAudioSoundfile
+│   └── repositories/        #   MotorSupertonic, RepositorioArchivosLocal, ExportadorAudioSoundfile, PreferenciasJSONLocal
 ├── presentation/            # Interfaz de usuario (consume SOLO inyecciones)
 │   ├── cli.py               #   argparse + tqdm (con fallback dummy)
 │   ├── gui.py               #   Tkinter
