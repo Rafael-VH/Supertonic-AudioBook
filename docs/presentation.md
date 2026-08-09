@@ -10,7 +10,7 @@ Argumentos de argparse:
 
 | Opción | Default | Descripción |
 |--------|---------|-------------|
-| `-c, --archivo ARCHIVO` | todos | Procesar solo un archivo (dentro de `archivos/`) |
+| `-a, --archivo ARCHIVO` | todos | Procesar solo un archivo (dentro de `archivos/`) |
 | `-v, --voz VOZ` | `M1` | Voz (`M1`–`M5`, `F1`–`F5`) |
 | `--steps` | `5` | Pasos de inferencia |
 | `--speed` | `1.1` | Velocidad de habla |
@@ -22,9 +22,11 @@ Comportamiento:
 
 1. Normaliza formatos con `normalizar_formatos` (un formato inválido → `parser.error`).
 2. Asegura `archivos/` y `audio/` (`crear_carpetas_si_no_existen`).
-3. Si `--archivo`: verifica que exista en `archivos/` (si no, exit 1). Si no: lista todos los `.md` (si no hay, avisa y termina).
+3. Si `--archivo`: verifica que exista en `archivos/` y que la ruta resuelta quede DENTRO de `archivos/` (guard anti path-traversal: `Path.resolve().is_relative_to(carpeta_archivos)`; si no, exit 1). Si no: lista todos los `.md` (si no hay, avisa y termina).
 4. Crea el use case con `fabrica_use_case(args.voz)`.
 5. Procesa cada archivo con `ruta_base = audio/<stem>` y `on_progreso=_barra_progreso(...)`.
+
+**`--cli` está oculto**: se registra con `argparse.SUPPRESS` para que `--help` muestre solo la GUI por defecto; los scripts y documentación interna lo usan para forzar el modo texto.
 
 **tqdm es opcional**: si no está instalado, `_DummyTqdm` (iterable + `set_description`/`update`/`close`/`write` no-op) reemplaza la barra y todo funciona igual. Es UI, por eso vive acá y no en el dominio.
 
@@ -56,6 +58,8 @@ Entrada: `AppLector(*, fabrica_use_case, repositorio, carpeta_base, repositorio_
 | Progreso | `ttk.Progressbar` + porcentaje + etiqueta de estado |
 | Feedback | Snackbar flotante estilo Material (`_mostrar_snackbar`) en lugar de diálogos modales |
 | Log | `ScrolledText` con niveles coloreados; `logging` raíz en `INFO`. Registra: config al iniciar (voz/pasos/velocidad/idioma de la voz/formatos/salida), cada archivo (`▶ N/M`), progreso de segmentos (máx. ~20 líneas por archivo), fin por archivo (`✔`), cancelación (`■`), errores con traceback y tiempo total |
+| Rueda del mouse | Scroll direccional (horizontal en la lista de archivos, vertical en el log) mediante `<MouseWheel>`/`<Shift-MouseWheel>` en los toplevel; con `try/except TclError` para que una plataforma sin `wm_attributes` no rompa la reconstrucción de la UI |
+| Cambio de idioma | `_reconstruir_ui` resetea también los checks de formatos a los valores actuales (`_vars_check`/`_checks`) y conserva log, tema y modo responsive; el cambio es seguro aun con la ventana de ajustes abierta |
 
 Preferencias persistentes (contrato `RepositorioPreferencias` de `domain/repositories`, implementado como JSON en `data/repositories/repositorio_preferencias.py`):
 

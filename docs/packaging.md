@@ -71,7 +71,16 @@ Pasos: verifica la app → copia `APP_DIST` a `STAGING_LITE` **sin** `modelo/` (
 
 ## Flujo de build completo (para release)
 
+Antes de compilar se ejecuta el **gate de calidad** (regla 5 de `AGENTS.md`, obligatorio):
+
 ```
+0. Gate de calidad:
+   a. python -m unittest discover -s tests -v        (desde app/) — suite del dominio puro
+   b. Revisión adversarial con agentes (judgment-day): 2 jueces ciegos en paralelo
+      sobre errores, malas prácticas y vulnerabilidades → arreglar solo lo confirmado
+      → re-juzgar hasta APPROVED/ESCALATED.
+   c. Opcional: self-test real (descarga el modelo la 1ra vez)
+
 1. pyinstaller app/SupertonicAudioBook.spec        → app/dist/SupertonicAudioBook/
 2. python app/main.py --self-test  (opcional, verifica el motor)
 3. copiar modelo/ a app/dist/SupertonicAudioBook/  (si se quiere offline)

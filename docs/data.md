@@ -55,7 +55,7 @@ Implementación con pathlib del contrato `RepositorioArchivos`.
 | `listar_archivos_md(carpeta="archivos")` | Filtra `.md` (case-insensitive) y ordena con **natural sort**. Carpeta inexistente o sin archivos → warning + lista vacía |
 | `leer_archivo(ruta)` | `ruta.read_text(encoding="utf-8")` |
 
-**Natural sort** (`_natural_sort_key`): extrae TODOS los números del `stem` del archivo y los usa como clave de orden. `archivo2.md` → `(2,)`, `archivo10.md` → `(10,)` (va después). Si no hay números, usa el nombre como string. `archivo10` ordena después de `archivo2` en vez de después de `archivo9` como haría el sort lexicográfico.
+**Natural sort** (`_natural_sort_key`): separa el `stem` en tokens alternados de texto y número (`re.split(r"(\d+)", ...)`) y los compara como tupla: los números como enteros, el resto como texto. Un discriminador inicial separa nombres que empiezan con dígito (`0`) de los que empiezan con texto (`1`) para que nunca se compare `int` contra `str`, y el `stem` completo desempata de forma determinista nombres numéricamente iguales (`archivo01` vs `archivo1`). `archivo2.md` → `(1, ('archivo', 2), 'archivo2')`, `archivo10.md` → `(1, ('archivo', 10), 'archivo10')`: `archivo10` ordena después de `archivo2`, no como haría el sort lexicográfico.
 
 ### `exportador_audio.py` — `ExportadorAudioSoundfile`
 
@@ -65,7 +65,7 @@ Implementación con soundfile + numpy. ÚNICA clase que importa `soundfile`.
 |--------|----------------|
 | `escribir_audio` | `np.concatenate(fragmentos)` → `sf.write(ruta, audio, SAMPLE_RATE, subtype=SUBTIPOS_AUDIO[formato])`. Fragmentos vacíos → no-op |
 | `wav_append` | Para volcado incremental. Concatena, `np.clip(audio, -1, 1) * 32767 → int16`. Si el archivo no existe o está vacío, `sf.write` normal; si existe, escribe los bytes crudos al final y **parchea el header RIFF** (tamaño de chunk en offset 4 y de datos en offset 40) |
-| `convertir_desde_wav` | `sf.read` del WAV → `sf.write` en el formato destino con su subtipo |
+| `convertir_desde_wav` | `sf.read` del WAV → `sf.write` en el formato destino con su subtipo. **Precaución**: `sf.read` carga el WAV completo a RAM (picos de 2-4 GB en libros enormes); el flush de la síntesis acota la RAM al generar, pero la conversión de formato es full-load |
 | `duracion_audio` | `sf.info` (lee SOLO cabecera, no carga el archivo) → `frames / samplerate`. Error → warning + `0.0` |
 
 > **Gotcha `wav_append`**: soundfile no tiene append nativo para WAV. Se escriben los samples int16 little-endian al final del archivo y se parchean los 2 campos de tamaño del header RIFF. Si el archivo destino existe pero tiene tamaño 0, se reescribe como WAV nuevo.

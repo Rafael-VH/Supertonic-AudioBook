@@ -66,7 +66,14 @@ leer_archivo(self, ruta: Path) -> str   # UTF-8
 
 ### `limpiar_markdown.py` — `limpiar_markdown(texto)`
 
-Función pura que elimina sintaxis Markdown con `re.sub` en cadena: títulos (`#`), negrita/cursiva (`*` `_`), inline code (`` ` ``), links `[texto](url)` → texto, imágenes `![alt](url)` → alt, blockquotes (`>`), listas (`- ` `* ` `+ `), líneas horizontales (`---`, `***`) y bloques de código (```` ``` ```` y `~~~`). Normaliza 3+ saltos a 2.
+Función pura que elimina sintaxis Markdown con `re.sub` en cadena: bloques de código (```` ``` ```` y `~~~`), títulos (`#`), negrita/cursiva (`*` `_`), inline code (`` ` ``), links `[texto](url)` → texto, imágenes `![alt](url)` → alt, blockquotes (`>`), listas (`- ` `* ` `+ ` y `1. `), líneas horizontales (3+ marcadores: `---`, `***`, `- - -`, ...) y saltos de línea. Normaliza 3+ saltos a 2.
+
+Reglas de seguridad (evitan corromper prosa que el TTS va a leer en voz alta):
+
+- El énfasis no se come operadores ni identificadores: `2 * 3 * 4 = 24`, `a*b*c`, `clave_privada_valor` sobreviven intactos; `**negrita**`, `*cursiva*`, `***ambas***` se limpian.
+- Énfasis pegado a palabra (`**a**b`, `la **mejor**opcion`, `**Nota:***esto*`) se conserva literal en vez de quedar medio comido.
+- Listas, blockquote y líneas horizontales están ancladas al inicio de línea completa: `5 > 3`, `a---b`, `a * b` o `2024. Cifra` no se pierden en medio de la prosa.
+- Los bloques de código se quitan ANTES que los inline para no corromper su contenido.
 
 ### `segmentar_texto.py` — reglas de segmentación
 
@@ -119,3 +126,5 @@ seleccionado antes de procesar. Se compone en `main.py` con
   - Cancelación entre segmentos exporta lo generado hasta ahora.
   - Si no se generó NINGÚN fragmento: `log.error` y return sin archivos.
   - Al final loguea la duración real de cada archivo (`duracion_audio`).
+- **Publicación atómica por archivo**: el WAV de trabajo es SIEMPRE un temporal; cada salida se publica con `os.replace` (atómico) recién cuando está completa. Si la corrida se cancela o falla durante la síntesis, el output previo de cada formato queda intacto. Los formatos se deduplican (`dict.fromkeys`) y cada corrida regenera SOLO los pedidos; salidas viejas de formatos no pedidos permanecen en disco.
+- **Orden de publicación**: en la fase 2 el WAV se publica ÚLTIMO (`_orden_publicacion`). Si falla un formato no-WAV (ej: archivo abierto en otra app → `PermissionError` logueado y propagado), el WAV previo no se reemplaza, aunque los formatos ya publicados sí quedaron actualizados.

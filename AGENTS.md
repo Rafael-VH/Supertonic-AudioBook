@@ -19,6 +19,7 @@ Documentación del proyecto en `docs/`. Léela antes de modificar código, busca
 2. `app/main.py` se ejecuta con `cwd = app/` (imports absolutos). El spec de PyInstaller usa `pathex=[SPECPATH]`.
 3. **Idioma**: código, docstrings y docs en español. La UI de la GUI es bilingüe ES/EN (`TRADUCCIONES` en `presentation/gui.py`). Commits en conventional commits, sin atribución de IA.
 4. No comprometas secretos ni API keys.
+5. **Gate de calidad previo al build**: antes de compilar el portable (PyInstaller), corré la suite de tests (`python -m unittest discover -s tests -v` desde `app/`) y la revisión adversarial (judgment-day: 2 jueces ciegos en paralelo → arreglar solo hallazgos confirmados → re-juzgar). No se compila sin ese gate.
 
 ## Comandos útiles
 
@@ -34,4 +35,7 @@ python main.py --cli --help
 
 # Self-test completo (hace síntesis real; lento, descarga modelo la 1ra vez)
 python main.py --self-test
+
+# Suite de tests unitarios del dominio (desde app/)
+python -m unittest discover -s tests -v
 ```
