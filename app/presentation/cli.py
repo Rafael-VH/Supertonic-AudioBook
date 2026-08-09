@@ -9,7 +9,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import Callable, List
 
 from domain.entities.archivo import Archivo
 from domain.repositories.motor_tts import DEFAULT_SPEED, DEFAULT_TTS_STEPS, DEFAULT_VOICE
@@ -58,11 +58,11 @@ def _parse_args() -> argparse.Namespace:
     """Configura y parsea los argumentos de línea de comandos."""
     parser = argparse.ArgumentParser(
         description="Convierte archivos en Markdown a audios (wav, flac, ogg, mp3) con voz sintética.",
-        epilog="Ejemplo: python main.py --cli --archivo cap3.md --voz F1 --steps 10 --formato mp3",
+        epilog="Ejemplo: python main.py --cli --archivo archivo3.md --voz F1 --steps 10 --formato mp3",
     )
 
     parser.add_argument(
-        "--archivo", "-c",
+        "--archivo", "-a",
         type=str,
         default=None,
         metavar="ARCHIVO",
@@ -106,6 +106,9 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Modo silencioso (solo warnings y errores).",
     )
+    # main.py invoca la CLI con "--cli" en el argv; se registra oculto para que
+    # argparse lo acepte sin mostrarlo en la ayuda ni filtrar manualmente argv.
+    parser.add_argument("--cli", action="store_true", help=argparse.SUPPRESS)
 
     args = parser.parse_args()
     try:
@@ -145,6 +148,10 @@ def main(
     # Determinar qué archivos procesar
     if args.archivo:
         ruta = Path("archivos") / args.archivo
+        carpeta_archivos = Path("archivos").resolve()
+        if not ruta.resolve().is_relative_to(carpeta_archivos):
+            log.error("El archivo debe estar dentro de la carpeta 'archivos/'.")
+            sys.exit(1)
         if not ruta.exists():
             log.error("El archivo '%s' no existe en la carpeta 'archivos/'.", ruta)
             sys.exit(1)
