@@ -98,7 +98,7 @@ class ProcesarCapitulo:
         # temporal que sirve de fuente intermedia y se borra al terminar.
         usando_wav = "wav" in formatos
         if usando_wav:
-            ruta_wav_trabajo = ruta_base.with_suffix(".wav")
+            ruta_wav_trabajo = Path(str(ruta_base) + ".wav")
         else:
             fd, tmp = tempfile.mkstemp(suffix=".wav", dir=str(ruta_base.parent))
             os.close(fd)
@@ -154,14 +154,14 @@ class ProcesarCapitulo:
                         continue
                     self._exportador.convertir_desde_wav(
                         ruta_wav_trabajo,
-                        ruta_base.with_suffix("." + formato),
+                        Path(str(ruta_base) + "." + formato),
                         formato,
                     )
             else:
                 for formato in formatos:
                     self._exportador.escribir_audio(
                         fragmentos,
-                        ruta_base.with_suffix("." + formato),
+                        Path(str(ruta_base) + "." + formato),
                         formato,
                     )
         finally:
@@ -169,6 +169,6 @@ class ProcesarCapitulo:
                 ruta_wav_trabajo.unlink()
 
         for formato in formatos:
-            ruta = ruta_base.with_suffix("." + formato)
+            ruta = Path(str(ruta_base) + "." + formato)
             duracion = self._exportador.duracion_audio(ruta)
             log.info("  + %s (%s): %.1f s", ruta.name, formato.upper(), duracion)
