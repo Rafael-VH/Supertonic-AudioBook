@@ -14,9 +14,9 @@ def listar_archivos_md(carpeta="archivos"):
     archivos = [f for f in os.listdir(carpeta) if f.lower().endswith(".md")]
     if not archivos:
         print("[!] No se encontraron archivos .md en la carpeta 'archivos/'.")
-        print("    Coloca tus capitulos alli (formato Markdown).")
+        print("    Coloca tus archivos alli (formato Markdown).")
         return []
-    print(f"[*] Detectados {len(archivos)} capitulo(s): {', '.join(archivos)}")
+    print(f"[*] Detectados {len(archivos)} archivo(s): {', '.join(archivos)}")
     return sorted(archivos)
 
 def limpiar_markdown(texto):
@@ -89,7 +89,7 @@ def cargar_tts(voz="M1"):
     style = _TTS_ENGINE.get_voice_style(voice_name=voz)
     return _TTS_ENGINE, style
 
-def procesar_capitulo(nombre_archivo, voz="M1"):
+def procesar_archivo(nombre_archivo, voz="M1"):
     ruta_entrada = os.path.join("archivos", nombre_archivo)
     nombre_base = os.path.splitext(nombre_archivo)[0]
     ruta_salida = os.path.join("audio", nombre_base + ".wav")
@@ -136,5 +136,5 @@ if __name__ == "__main__":
         print("\nCrea un archivo .md dentro de la carpeta 'archivos/' y ejecuta de nuevo.")
     else:
         for archivo in archivos:
-            procesar_capitulo(archivo, voz="M1")
-        print("Todos los capitulos procesados.")
+            procesar_archivo(archivo, voz="M1")
+        print("Todos los archivos procesados.")

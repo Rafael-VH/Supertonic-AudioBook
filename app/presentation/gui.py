@@ -18,7 +18,7 @@ from pathlib import Path
 from tkinter import filedialog, scrolledtext, ttk
 from typing import Callable, Dict, List, Optional
 
-from domain.entities.capitulo import Capitulo
+from domain.entities.archivo import Archivo
 from domain.repositories.motor_tts import (
     DEFAULT_LANG,
     DEFAULT_SPEED,
@@ -29,7 +29,7 @@ from domain.repositories.motor_tts import (
 from domain.repositories.repositorio_archivos import RepositorioArchivos
 from domain.repositories.repositorio_preferencias import RepositorioPreferencias
 from domain.use_cases.formato import FORMATOS_NATIVOS
-from domain.use_cases.procesar_capitulo import ProcesarCapitulo
+from domain.use_cases.procesar_archivo import ProcesarArchivo
 from domain.use_cases.sintetizar_muestra import SintetizarMuestra
 
 log = logging.getLogger("lector")
@@ -135,7 +135,7 @@ TRADUCCIONES: dict = {
         "todo": "Todo",
         "nada": "Nada",
         "refrescar": "Refrescar",
-        "ayuda_seleccion": "Ctrl+clic\npara varios;\nvacío = todos",
+        "ayuda_seleccion": "Marcá los que querés\nsin marcas = todos",
         "opciones_sintesis": "Opciones de síntesis",
         "formato": "Formato",
         "voz": "Voz",
@@ -205,7 +205,7 @@ TRADUCCIONES: dict = {
         "todo": "All",
         "nada": "None",
         "refrescar": "Refresh",
-        "ayuda_seleccion": "Ctrl+click\nto select several;\nempty = all",
+        "ayuda_seleccion": "Check the ones you want\nnone checked = all",
         "opciones_sintesis": "Synthesis options",
         "formato": "Format",
         "voz": "Voice",
@@ -281,14 +281,14 @@ class AppLector(tk.Tk):
     def __init__(
         self,
         *,
-        fabrica_use_case: Callable[[str], ProcesarCapitulo],
+        fabrica_use_case: Callable[[str], ProcesarArchivo],
         fabrica_muestra: Optional[Callable[[str], SintetizarMuestra]] = None,
         repositorio: RepositorioArchivos,
         carpeta_base: Path,
         repositorio_preferencias: RepositorioPreferencias,
     ) -> None:
         """Args:
-            fabrica_use_case: Crea ``ProcesarCapitulo`` para una voz dada.
+            fabrica_use_case: Crea ``ProcesarArchivo`` para una voz dada.
             fabrica_muestra: Crea ``SintetizarMuestra`` para probar la voz
                 (``None`` oculta el botón "Escuchar").
             repositorio: Acceso a los archivos en disco (inyectado).
@@ -320,6 +320,8 @@ class AppLector(tk.Tk):
         self._en_ejecucion = False
         self._probando_voz = False
         self._archivos: List[Path] = []
+        self._vars_check: Dict[int, tk.BooleanVar] = {}
+        self._checks: Dict[int, tk.Checkbutton] = {}
         self._seleccion: List[Path] = []
         self._ventana_ajustes: tk.Toplevel | None = None
         self._main: ttk.Frame | None = None
@@ -453,17 +455,26 @@ class AppLector(tk.Tk):
         lista_frame = ttk.Frame(fila_lista, style="Tarjeta.TFrame")
         lista_frame.pack(side="left", fill="both", expand=True)
         scroll = ttk.Scrollbar(lista_frame, orient="vertical")
-        self.lista = tk.Listbox(
+        self._lienzo = tk.Canvas(
             lista_frame,
-            selectmode="extended",
-            height=8,
-            activestyle="dotbox",
+            highlightthickness=0,
             yscrollcommand=scroll.set,
         )
-        scroll.config(command=self.lista.yview)
+        self._contenedor_check = tk.Frame(self._lienzo)
+        self._ventana_lienzo = self._lienzo.create_window(
+            (0, 0), window=self._contenedor_check, anchor="nw"
+        )
+        scroll.config(command=self._lienzo.yview)
         scroll.pack(side="right", fill="y")
-        self.lista.pack(side="left", fill="both", expand=True)
-        self.lista.bind("<<ListboxSelect>>", self._actualizar_conteo)
+        self._lienzo.pack(side="left", fill="both", expand=True)
+        self._contenedor_check.bind(
+            "<Configure>", lambda e: self._lienzo.configure(scrollregion=self._lienzo.bbox("all"))
+        )
+        self._lienzo.bind(
+            "<Configure>", lambda e: self._lienzo.itemconfig(self._ventana_lienzo, width=e.width)
+        )
+        self._lienzo.bind("<MouseWheel>", self._scroll_lienzo)
+        self._contenedor_check.bind("<MouseWheel>", self._scroll_lienzo)
 
         panel_botones = ttk.Frame(fila_lista, style="Tarjeta.TFrame")
         panel_botones.pack(side="left", fill="y", padx=(8, 0))
@@ -990,16 +1001,16 @@ class AppLector(tk.Tk):
 
     def _estilizar_no_ttk(self) -> None:
         c = self._paleta
-        self.lista.configure(
-            bg=c["superficie"],
-            fg=c["texto"],
-            selectbackground=c["primario"],
-            selectforeground=c["sobre_primario"],
-            highlightbackground=c["borde"],
-            highlightcolor=c["primario"],
-            relief="flat",
-            borderwidth=1,
-        )
+        self._lienzo.configure(bg=c["superficie"])
+        self._contenedor_check.configure(bg=c["superficie"])
+        for check in self._checks.values():
+            check.configure(
+                bg=c["superficie"],
+                fg=c["texto"],
+                activebackground=c["superficie"],
+                activeforeground=c["texto"],
+                selectcolor=c["fondo"],
+            )
         self._txt.configure(
             bg=c["superficie"],
             fg=c["texto"],
@@ -1029,24 +1040,53 @@ class AppLector(tk.Tk):
 
     def _refrescar_archivos(self) -> None:
         self._archivos = self._repositorio.listar_archivos_md(self._var_carpeta_in.get())
-        self.lista.delete(0, "end")
-        for archivo in self._archivos:
-            self.lista.insert("end", archivo.name)
+        for hijo in self._contenedor_check.winfo_children():
+            hijo.destroy()
+        self._vars_check = {}
+        self._checks = {}
+        c = self._paleta
+        for i, archivo in enumerate(self._archivos):
+            var = tk.BooleanVar(value=False)
+            check = tk.Checkbutton(
+                self._contenedor_check,
+                text=archivo.name,
+                variable=var,
+                anchor="w",
+                justify="left",
+                bg=c["superficie"],
+                fg=c["texto"],
+                activebackground=c["superficie"],
+                activeforeground=c["texto"],
+                selectcolor=c["fondo"],
+                highlightthickness=0,
+                bd=0,
+                padx=4,
+                pady=2,
+                command=self._actualizar_conteo,
+            )
+            check.pack(fill="x")
+            self._vars_check[i] = var
+            self._checks[i] = check
         self._actualizar_conteo()
 
+    def _scroll_lienzo(self, event) -> None:
+        self._lienzo.yview_scroll(int(-event.delta / 120), "units")
+
     def _seleccionar_todo(self) -> None:
-        if self.lista.size():
-            self.lista.selection_set(0, "end")
+        for var in self._vars_check.values():
+            var.set(True)
+        self._actualizar_conteo()
 
     def _limpiar_seleccion(self) -> None:
-        self.lista.selection_clear(0, "end")
+        for var in self._vars_check.values():
+            var.set(False)
         self._actualizar_conteo()
 
     # ------------------------------------------------------- preferencias
 
     def _actualizar_conteo(self, *_args) -> None:
-        total = self.lista.size()
-        seleccionados = len(self.lista.curselection())
+        total = len(self._archivos)
+        seleccionados = sum(1 for var in self._vars_check.values() if var.get())
         if seleccionados:
             self._lbl_conteo.config(
                 text=self.t("conteo_seleccionados").format(sel=seleccionados, total=total)
@@ -1128,13 +1168,17 @@ class AppLector(tk.Tk):
             log.warning(self.t("log_formato_no_ok"))
             return
 
-        self._seleccion = [self._archivos[i] for i in self.lista.curselection()]
+        self._seleccion = [self._archivos[i] for i, var in self._vars_check.items() if var.get()]
         if not self._seleccion:
             self._seleccion = list(self._archivos)
         if not self._seleccion:
             self._mostrar_snackbar(self.t("snackbar_sin_md"), "error")
             log.warning(self.t("log_sin_md"))
             return
+
+        self._txt.config(state="normal")
+        self._txt.delete("1.0", "end")
+        self._txt.config(state="disabled")
 
         log.info(
             self.t("log_inicio").format(sel=len(self._seleccion), total=len(self._archivos))
@@ -1206,14 +1250,14 @@ class AppLector(tk.Tk):
             log.info("=" * 60)
 
             use_case = self._fabrica_use_case(voz)
-            total_caps = len(self._seleccion)
+            total_archivos = len(self._seleccion)
             for i, ruta in enumerate(self._seleccion, 1):
                 if self._cancelar.is_set():
                     break
-                self._cola.put(("capitulo", i, total_caps, ruta.name))
-                log.info(self.t("log_archivo").format(i=i, n=total_caps, nombre=ruta.name))
+                self._cola.put(("archivo", i, total_archivos, ruta.name))
+                log.info(self.t("log_archivo").format(i=i, n=total_archivos, nombre=ruta.name))
                 use_case.procesar(
-                    Capitulo(ruta),
+                    Archivo(ruta),
                     salida / ruta.stem,
                     steps=steps,
                     speed=speed,
@@ -1222,9 +1266,9 @@ class AppLector(tk.Tk):
                     on_progreso=self._cb_progreso,
                     debe_detenerse=self._cb_detenerse,
                 )
-                log.info(self.t("log_archivo_fin").format(i=i, n=total_caps))
+                log.info(self.t("log_archivo_fin").format(i=i, n=total_archivos))
             elapsed = time.monotonic() - inicio
-            self._cola.put(("fin", not self._cancelar.is_set(), total_caps, elapsed))
+            self._cola.put(("fin", not self._cancelar.is_set(), total_archivos, elapsed))
         except Exception as exc:
             logging.getLogger("gui").exception("Error en el hilo de trabajo")
             self._cola.put(("error", str(exc)))
@@ -1259,7 +1303,7 @@ class AppLector(tk.Tk):
             self._probando_voz = False
             if self._btn_escuchar is not None:
                 self._btn_escuchar.config(state="normal")
-        elif tipo == "capitulo":
+        elif tipo == "archivo":
             _, i, n, nombre = msg
             self._lbl_estado.config(text=self.t("estado_archivo").format(i=i, n=n, nombre=nombre))
             self._barra.config(value=0)

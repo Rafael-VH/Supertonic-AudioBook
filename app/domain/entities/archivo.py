@@ -1,12 +1,12 @@
-"""Entidad de dominio: un capítulo Markdown por convertir."""
+"""Entidad de dominio: un archivo Markdown por convertir."""
 
 from dataclasses import dataclass
 from pathlib import Path
 
 
 @dataclass(frozen=True)
-class Capitulo:
-    """Capítulo de entrada (archivo Markdown) listo para procesar.
+class Archivo:
+    """Archivo de entrada (Markdown) listo para procesar.
 
     Atributos:
         ruta: Ruta al archivo .md de entrada.
@@ -16,7 +16,7 @@ class Capitulo:
 
     @property
     def nombre(self) -> str:
-        """Nombre del archivo con extensión (ej: 'capitulo3.md')."""
+        """Nombre del archivo con extensión (ej: 'archivo3.md')."""
         return self.ruta.name
 
     @property

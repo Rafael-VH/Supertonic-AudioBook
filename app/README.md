@@ -20,21 +20,23 @@ el código separado en capas (`domain/`, `data/`, `presentation/`) y el spec de 
 
 Incluye **dos interfaces**:
 
-- 🖥️ **CLI** — `python main.py --cli`: procesa capítulos desde la terminal.
-- 🗔 **GUI** — `python main.py` (o `python main.py --gui`): ventana Tkinter con selección de capítulos, formatos, voz y parámetros del TTS, sin necesidad de la terminal.
+- 🖥️ **CLI** — `python main.py --cli`: procesa archivos desde la terminal.
+- 🗔 **GUI** — `python main.py` (o `python main.py --gui`): ventana Tkinter con selección de archivos, formatos, voz, idioma de la voz y parámetros del TTS, tema claro/oscuro, idioma de la interfaz (ES/EN) y botón "Escuchar", sin necesidad de la terminal.
 
 ## Características
 
 - Exportación multi-formato **nativa**: `wav`, `flac`, `ogg` y `mp3` (sin ffmpeg).
-- **Natural sorting** de capítulos: `capitulo10.md` va después de `capitulo2.md`.
+- **Natural sorting** de archivos: `archivo10.md` va después de `archivo2.md`.
 - Limpieza automática de sintaxis Markdown (títulos, listas, links, imágenes, bloques de código, etc.).
 - Segmentación de texto optimizada para TTS con soporte de abreviaturas del español (`Dr.`, `Sr.`, `etc.`).
 - **Protección de memoria para libros largos**: volcado incremental a disco cuando los fragmentos acumulados superan ~500 MB.
-- Manejo de errores en síntesis: un fragmento fallido no aborta el capítulo.
+- Manejo de errores en síntesis: un fragmento fallido no aborta el archivo.
 - Validación de la voz antes de usarla.
 - Barra de progreso con `tqdm` (opcional).
 - Logging granular (`--verbose` / `--quiet`).
 - En la GUI: cancelación en cualquier momento (exporta lo generado hasta entonces) y `--self-test` para verificar el motor sin abrir la ventana.
+- En la GUI: tema claro/oscuro, idioma de la interfaz ES/EN (ventana `⚙` de ajustes, se aplica y guarda al instante) e **idioma de la voz** (31 idiomas + auto).
+- En la GUI: botón **`▶` Escuchar** que sintetiza y reproduce una muestra con la voz e idioma seleccionados.
 - **Arquitectura en capas**: `domain/` (reglas puras e interfaces), `data/` (implementaciones del motor, archivos y audio) y `presentation/` (CLI, GUI y self-test). `main.py` es la raíz de composición que las conecta.
 
 ## Requisitos
@@ -61,11 +63,11 @@ pip install pyinstaller     # opcional: para empaquetar el .exe
 
 ## Uso — CLI
 
-Desde la carpeta del proyecto, con los capítulos `.md` dentro de `archivos/`:
+Desde la carpeta del proyecto, con los archivos `.md` dentro de `archivos/`:
 
 ```bash
 python main.py --cli
-python main.py --cli --capitulo capitulo3.md
+python main.py --cli --archivo archivo3.md
 python main.py --cli --voz F1 --steps 10
 python main.py --cli --formato mp3
 python main.py --cli --formato wav,mp3,flac
@@ -76,7 +78,7 @@ python main.py --cli --verbose
 
 | Opción | Descripción | Default |
 |--------|-------------|---------|
-| `-c, --capitulo ARCHIVO` | Procesar solo un capítulo (ej: `capitulo3.md`). Debe existir dentro de `archivos/`. Sin esta opción se procesan todos los `.md` encontrados. | todos |
+| `-c, --archivo ARCHIVO` | Procesar solo un archivo (ej: `archivo3.md`). Debe existir dentro de `archivos/`. Sin esta opción se procesan todos los `.md` encontrados. | todos |
 | `-v, --voz VOZ` | Voz a usar. Voces disponibles: `M1`–`M5`, `F1`–`F5`. | `M1` |
 | `--steps` | Pasos de inferencia del TTS. Más pasos = mejor calidad, más lento. | `5` |
 | `--speed` | Velocidad de habla (`1.0` = normal). | `1.1` |
@@ -87,8 +89,8 @@ python main.py --cli --verbose
 ### Ejemplos
 
 ```bash
-# Un solo capítulo, voz femenina, mejor calidad, dos formatos
-python main.py --cli -c capitulo3.md -v F1 --steps 12 -f wav,mp3
+# Un solo archivo, voz femenina, mejor calidad, dos formatos
+python main.py --cli -c archivo3.md -v F1 --steps 12 -f wav,mp3
 
 # Toda la novela en mp3, más rápido
 python main.py --cli -f mp3 --speed 1.3
@@ -102,12 +104,14 @@ python main.py
 
 La ventana permite:
 
-- Elegir la **carpeta de entrada** (por defecto `archivos/`) y ver la lista de capítulos `.md`.
+- Elegir la **carpeta de entrada** (por defecto `archivos/`) y ver la lista de archivos `.md`.
   - Botones `Todo`, `Nada` y `Refrescar`.
   - `Ctrl+clic` para elegir varios; sin selección se procesan todos.
 - Elegir la **carpeta de salida** (por defecto `audio/`).
 - Marcar los **formatos de salida** (`WAV`, `FLAC`, `OGG`, `MP3`; `WAV` y `MP3` marcados por defecto).
-- Elegir **voz** (`M1`–`M5`, `F1`–`F5`), **pasos** (slider 5–12) y **velocidad** (slider 0.7–2.0).
+- Elegir **voz** (`M1`–`M5`, `F1`–`F5`), **idioma de la voz** (31 idiomas + auto, por defecto español), **pasos** (slider 5–12) y **velocidad** (slider 0.7–2.0).
+- Botón **`▶` Escuchar** para sintetizar y reproducir una muestra con la voz e idioma elegidos.
+- `⚙` **Ajustes**: tema (claro/oscuro) e idioma de la interfaz (español/inglés); se aplican al instante y quedan guardados entre sesiones.
 - `Procesar` para lanzar la conversión en un hilo aparte (la interfaz no se congela) y `Cancelar` para detenerla — se exporta lo generado hasta el momento.
 - Seguir el avance con la barra de progreso y el panel de registro (log) con niveles coloreados.
 
@@ -132,8 +136,8 @@ Escribe `audio/_self_test.wav`, imprime `SELF-TEST OK` (exit code `0`) o `SELF-T
 
 | Carpeta | Rol |
 |---------|-----|
-| `archivos/` | Capítulos de entrada (`.md`). Se crea automáticamente si no existe. |
-| `audio/` | Audio de salida. Se crea automáticamente; cada archivo usa el nombre del capítulo (ej: `capitulo3.wav`). |
+| `archivos/` | Archivos de entrada (`.md`). Se crea automáticamente si no existe. |
+| `audio/` | Audio de salida. Se crea automáticamente; cada archivo usa su nombre (ej: `archivo3.wav`). |
 | `modelo/` | Caché offline del modelo (assets ONNX + voces). En el ejecutable empaquetado, si esta carpeta existe junto al `.exe` la app funciona sin red; si no existe, el modelo se descarga al primer uso. |
 
 En la CLI las carpetas son relativas al directorio de trabajo. En la GUI se pueden cambiar ambas carpetas desde la ventana.
@@ -141,13 +145,13 @@ En la CLI las carpetas son relativas al directorio de trabajo. En la GUI se pued
 ## Detalles de síntesis
 
 - **Voces**: `M1`–`M5` y `F1`–`F5` (10 voces del modelo supertonic-3).
-- **Idioma**: español (`lang="es"`).
+- **Idioma de la voz**: 31 idiomas + `na` (auto); por defecto `es` (español). En la GUI se elige desde el combobox "Idioma de la voz".
 - **Pasos de inferencia**: default `5`; en la GUI el slider va de `5` a `12` (más = mejor calidad, más lento).
 - **Velocidad**: default `1.1`; en la GUI el slider va de `0.7` a `2.0`.
 - **Máximo de caracteres por segmento**: 1500. Los párrafos de menos de 200 caracteres se fusionan con el siguiente.
 - **Silencio entre segmentos**: 0.6 s.
 - **Frecuencia de muestreo**: 44100 Hz.
-- **Memoria**: si los fragmentos acumulados superan ~500 MB (libros muy largos), se vuelcan a disco de forma incremental — el capítulo nunca se pierde por falta de RAM.
+- **Memoria**: si los fragmentos acumulados superan ~500 MB (libros muy largos), se vuelcan a disco de forma incremental — el archivo nunca se pierde por falta de RAM.
 
 ---
 

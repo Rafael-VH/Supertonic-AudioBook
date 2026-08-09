@@ -4,13 +4,13 @@ Interfaces de usuario. Consume SOLO el dominio (use cases, entidades, constantes
 
 ## `cli.py` — Interfaz de línea de comandos
 
-Entrada: `main(fabrica_use_case: Callable[[str], ProcesarCapitulo], repositorio: RepositorioArchivos)`.
+Entrada: `main(fabrica_use_case: Callable[[str], ProcesarArchivo], repositorio: RepositorioArchivos)`.
 
 Argumentos de argparse:
 
 | Opción | Default | Descripción |
 |--------|---------|-------------|
-| `-c, --capitulo ARCHIVO` | todos | Procesar solo un capítulo (dentro de `archivos/`) |
+| `-c, --archivo ARCHIVO` | todos | Procesar solo un archivo (dentro de `archivos/`) |
 | `-v, --voz VOZ` | `M1` | Voz (`M1`–`M5`, `F1`–`F5`) |
 | `--steps` | `5` | Pasos de inferencia |
 | `--speed` | `1.1` | Velocidad de habla |
@@ -22,9 +22,9 @@ Comportamiento:
 
 1. Normaliza formatos con `normalizar_formatos` (un formato inválido → `parser.error`).
 2. Asegura `archivos/` y `audio/` (`crear_carpetas_si_no_existen`).
-3. Si `--capitulo`: verifica que exista en `archivos/` (si no, exit 1). Si no: lista todos los `.md` (si no hay, avisa y termina).
+3. Si `--archivo`: verifica que exista en `archivos/` (si no, exit 1). Si no: lista todos los `.md` (si no hay, avisa y termina).
 4. Crea el use case con `fabrica_use_case(args.voz)`.
-5. Procesa cada capítulo con `ruta_base = audio/<stem>` y `on_progreso=_barra_progreso(...)`.
+5. Procesa cada archivo con `ruta_base = audio/<stem>` y `on_progreso=_barra_progreso(...)`.
 
 **tqdm es opcional**: si no está instalado, `_DummyTqdm` (iterable + `set_description`/`update`/`close`/`write` no-op) reemplaza la barra y todo funciona igual. Es UI, por eso vive acá y no en el dominio.
 
@@ -55,7 +55,7 @@ Entrada: `AppLector(*, fabrica_use_case, repositorio, carpeta_base, repositorio_
 | Acciones | `▶ Procesar` y `■ Cancelar` (deshabilitado mientras no procesa) |
 | Progreso | `ttk.Progressbar` + porcentaje + etiqueta de estado |
 | Feedback | Snackbar flotante estilo Material (`_mostrar_snackbar`) en lugar de diálogos modales |
-| Log | `ScrolledText` con niveles coloreados; `logging` raíz en `INFO`. Registra: config al iniciar (voz/pasos/velocidad/idioma de la voz/formatos/salida), cada capítulo (`▶ N/M`), progreso de segmentos (máx. ~20 líneas por capítulo), fin por capítulo (`✔`), cancelación (`■`), errores con traceback y tiempo total |
+| Log | `ScrolledText` con niveles coloreados; `logging` raíz en `INFO`. Registra: config al iniciar (voz/pasos/velocidad/idioma de la voz/formatos/salida), cada archivo (`▶ N/M`), progreso de segmentos (máx. ~20 líneas por archivo), fin por archivo (`✔`), cancelación (`■`), errores con traceback y tiempo total |
 
 Preferencias persistentes (contrato `RepositorioPreferencias` de `domain/repositories`, implementado como JSON en `data/repositories/repositorio_preferencias.py`):
 
@@ -69,7 +69,7 @@ Arquitectura interna de la GUI (no se congela):
 - El procesamiento corre en un `threading.Thread` daemon (`_trabajo`), leyendo los valores de las variables Tk en el momento de arrancar.
 - `_LogHaciaCola(logging.Handler)` reenvía cada log a una `queue.Queue` con `("log", nivel, texto)`. Se agrega al logger raíz en el constructor.
 - `_drenar_cola()` (scheduleado con `after(100, ...)`) consume la cola en el hilo de la UI y actualiza widgets.
-- Mensajes de cola: `("log", nivel, texto)`, `("capitulo", i, n, nombre)`, `("progreso", actual, total)`, `("fin", exito, n)`, `("error", texto)`.
+- Mensajes de cola: `("log", nivel, texto)`, `("archivo", i, n, nombre)`, `("progreso", actual, total)`, `("fin", exito, n)`, `("error", texto)`.
 - **Cancelación**: `_cancelar = threading.Event()`; `debe_detenerse` del use case consulta `self._cancelar.is_set()` entre segmentos; al cancelar se exporta lo generado hasta ahora.
 
 ## `self_test.py` — Self-test

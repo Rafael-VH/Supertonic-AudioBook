@@ -1,6 +1,6 @@
 """Contrato del repositorio de archivos de entrada (capa de dominio).
 
-Abstrae el acceso al sistema de archivos: listado de capítulos Markdown,
+Abstrae el acceso al sistema de archivos: listado de archivos Markdown,
 creación de carpetas y lectura de texto. La implementación concreta
 (pathlib) vive en ``data/``.
 """
@@ -10,7 +10,7 @@ from typing import List, Protocol
 
 
 class RepositorioArchivos(Protocol):
-    """Acceso a los capítulos Markdown de entrada."""
+    """Acceso a los archivos Markdown de entrada."""
 
     def crear_carpetas_si_no_existen(self, *carpetas: str) -> None:
         """Crea las carpetas indicadas si no existen.

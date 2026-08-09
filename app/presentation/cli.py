@@ -11,11 +11,11 @@ import sys
 from pathlib import Path
 from typing import Callable, List, Optional
 
-from domain.entities.capitulo import Capitulo
+from domain.entities.archivo import Archivo
 from domain.repositories.motor_tts import DEFAULT_SPEED, DEFAULT_TTS_STEPS, DEFAULT_VOICE
 from domain.repositories.repositorio_archivos import RepositorioArchivos
 from domain.use_cases.formato import FORMATOS_NATIVOS, normalizar_formatos
-from domain.use_cases.procesar_capitulo import ProcesarCapitulo
+from domain.use_cases.procesar_archivo import ProcesarArchivo
 
 # tqdm es opcional — si no está instalado se cae a un dummy
 try:
@@ -57,16 +57,16 @@ log = logging.getLogger("lector")
 def _parse_args() -> argparse.Namespace:
     """Configura y parsea los argumentos de línea de comandos."""
     parser = argparse.ArgumentParser(
-        description="Convierte capítulos en Markdown a audios (wav, flac, ogg, mp3) con voz sintética.",
-        epilog="Ejemplo: python main.py --cli --capitulo cap3.md --voz F1 --steps 10 --formato mp3",
+        description="Convierte archivos en Markdown a audios (wav, flac, ogg, mp3) con voz sintética.",
+        epilog="Ejemplo: python main.py --cli --archivo cap3.md --voz F1 --steps 10 --formato mp3",
     )
 
     parser.add_argument(
-        "--capitulo", "-c",
+        "--archivo", "-c",
         type=str,
         default=None,
         metavar="ARCHIVO",
-        help="Procesar solo un capítulo (ej: capitulo3.md). Por defecto procesa todos.",
+        help="Procesar solo un archivo (ej: archivo3.md). Por defecto procesa todos.",
     )
     parser.add_argument(
         "--voz", "-v",
@@ -124,14 +124,14 @@ def _configurar_logging(verbose: bool, quiet: bool) -> None:
 
 
 def main(
-    fabrica_use_case: Callable[[str], ProcesarCapitulo],
+    fabrica_use_case: Callable[[str], ProcesarArchivo],
     repositorio: RepositorioArchivos,
 ) -> None:
     """Punto de entrada de la CLI.
 
     Args:
-        fabrica_use_case: Crea ``ProcesarCapitulo`` para una voz dada.
-        repositorio: Acceso a los capítulos en disco (inyectado).
+        fabrica_use_case: Crea ``ProcesarArchivo`` para una voz dada.
+        repositorio: Acceso a los archivos en disco (inyectado).
     """
     args = _parse_args()
     _configurar_logging(args.verbose, args.quiet)
@@ -143,8 +143,8 @@ def main(
     repositorio.crear_carpetas_si_no_existen("archivos", "audio")
 
     # Determinar qué archivos procesar
-    if args.capitulo:
-        ruta = Path("archivos") / args.capitulo
+    if args.archivo:
+        ruta = Path("archivos") / args.archivo
         if not ruta.exists():
             log.error("El archivo '%s' no existe en la carpeta 'archivos/'.", ruta)
             sys.exit(1)
@@ -158,11 +158,11 @@ def main(
     # Use case con el motor ya cableado para la voz pedida
     use_case = fabrica_use_case(args.voz)
 
-    # Procesar cada capítulo
+    # Procesar cada archivo
     for ruta in archivos:
         ruta_base = Path("audio") / ruta.stem
         use_case.procesar(
-            Capitulo(ruta),
+            Archivo(ruta),
             ruta_base,
             steps=args.steps,
             speed=args.speed,
@@ -170,7 +170,7 @@ def main(
             on_progreso=_barra_progreso(ruta.stem),
         )
 
-    log.info("✅ Todos los capítulos procesados.")
+    log.info("✅ Todos los archivos procesados.")
 
 
 def _barra_progreso(nombre: str) -> Callable[[int, int], None]:

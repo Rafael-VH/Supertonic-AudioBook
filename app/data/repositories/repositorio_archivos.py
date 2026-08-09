@@ -12,7 +12,7 @@ log = logging.getLogger("lector")
 
 
 class RepositorioArchivosLocal:
-    """Acceso a los capítulos Markdown de entrada en el sistema de archivos."""
+    """Acceso a los archivos Markdown de entrada en el sistema de archivos."""
 
     def crear_carpetas_si_no_existen(self, *carpetas: str) -> None:
         """Crea las carpetas indicadas si no existen (ver contrato)."""
@@ -36,7 +36,7 @@ class RepositorioArchivosLocal:
             log.warning("No se encontraron archivos .md en '%s/'.", carpeta)
         else:
             log.info(
-                "Detectados %d capítulo(s): %s",
+                "Detectados %d archivo(s): %s",
                 len(archivos),
                 ", ".join(p.name for p in archivos),
             )
@@ -55,8 +55,8 @@ class RepositorioArchivosLocal:
         Si no encuentra números, usa el nombre completo como string.
 
         Ejemplos:
-            capitulo2.md  → (2,)
-            capitulo10.md → (10,)
+            archivo2.md  → (2,)
+            archivo10.md → (10,)
             epilogo.md    → ('epilogo.md',)  ← orden alfabético
         """
         numeros = re.findall(r"\d+", path.stem)

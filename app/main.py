@@ -25,7 +25,7 @@ from data.repositories.motor_tts import MotorSupertonic
 from data.repositories.repositorio_archivos import RepositorioArchivosLocal
 from data.repositories.repositorio_preferencias import PreferenciasJSONLocal
 from domain.repositories.motor_tts import MotorTTS
-from domain.use_cases.procesar_capitulo import ProcesarCapitulo
+from domain.use_cases.procesar_archivo import ProcesarArchivo
 from domain.use_cases.sintetizar_muestra import SintetizarMuestra
 
 CARPETA_BASE = configurar_entorno()
@@ -41,9 +41,9 @@ def fabrica_muestra(voz: str) -> SintetizarMuestra:
     return SintetizarMuestra(motor=MotorSupertonic(voz=voz), exportador=ExportadorAudioSoundfile())
 
 
-def fabrica_use_case(voz: str) -> ProcesarCapitulo:
+def fabrica_use_case(voz: str) -> ProcesarArchivo:
     """Compone un caso de uso completo con las implementaciones concretas."""
-    return ProcesarCapitulo(
+    return ProcesarArchivo(
         motor=MotorSupertonic(voz=voz),
         archivos=RepositorioArchivosLocal(),
         exportador=ExportadorAudioSoundfile(),

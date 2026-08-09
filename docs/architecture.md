@@ -12,7 +12,7 @@ Partimos de un monolito (`lector_fanfiction_mejorado.py` + `lector_gui.py`) y lo
 app/
 ├── main.py                  # Raíz de composición (composition root)
 ├── domain/                  # Capa más interna: reglas de negocio puras
-│   ├── entities/            #   Capitulo
+│   ├── entities/            #   Archivo
 │   ├── repositories/        #   Contratos (Protocols) + constantes de producto
 │   └── use_cases/           #   Pipeline: limpiar, segmentar, procesar, formatos
 ├── data/                    # Implementaciones concretas del mundo exterior
@@ -50,7 +50,7 @@ Funciones de composición expuestas:
 - `CARPETA_BASE = configurar_entorno()` — resuelve la carpeta base (junto al exe si está empaquetada, si no `app/`) y apunta la caché del modelo a `modelo/`.
 - `fabrica_motor(voz) -> MotorTTS` — crea `MotorSupertonic` con la voz pedida.
 - `fabrica_muestra(voz) -> SintetizarMuestra` — compone el caso de uso de muestra de voz (motor + exportador) para el botón "Escuchar" de la GUI.
-- `fabrica_use_case(voz) -> ProcesarCapitulo` — compone el caso de uso completo con motor, repositorio y exportador concretos, inyectando `SILENCE_SAMPLES` y `MEMORY_SAFE_MARGIN_BYTES`.
+- `fabrica_use_case(voz) -> ProcesarArchivo` — compone el caso de uso completo con motor, repositorio y exportador concretos, inyectando `SILENCE_SAMPLES` y `MEMORY_SAFE_MARGIN_BYTES`.
 
 Por eso `fabrica_use_case` acepta la voz como parámetro: la CLI/GUI la toman del usuario y la raíz recompone un caso de uso por cada voz.
 
@@ -60,7 +60,7 @@ Por eso `fabrica_use_case` acepta la voz como parámetro: la CLI/GUI la toman de
 GUI/CLI (usuario elige voz, formatos, steps, speed)
    │  inyecta dependencias desde main.py
    ▼
-ProcesarCapitulo (domain/use_cases)  ← orquesta, NO implementa
+ProcesarArchivo (domain/use_cases)  ← orquesta, NO implementa
    ├── RepositorioArchivos.leer_archivo()      → texto .md
    ├── limpiar_markdown()                      → texto plano
    ├── segmentar_texto()                       → lista de segmentos
@@ -69,9 +69,9 @@ ProcesarCapitulo (domain/use_cases)  ← orquesta, NO implementa
    └── on_progreso / debe_detenerse            → callbacks hacia la UI
 ```
 
-## Pipeline del caso de uso (ProcesarCapitulo.procesar)
+## Pipeline del caso de uso (ProcesarArchivo.procesar)
 
-1. **Leer y limpiar**: `leer_archivo` → `limpiar_markdown`. Si falla o queda vacío, se omite el capítulo.
+1. **Leer y limpiar**: `leer_archivo` → `limpiar_markdown`. Si falla o queda vacío, se omite el archivo.
 2. **Segmentar**: `segmentar_texto` con reglas de fusión/límites (ver [domain.md](domain.md)).
 3. **Sintetizar incrementalmente**: por cada segmento llama `motor.sintetizar` y acumula en RAM. Si el audio acumulado supera `memoria_safe_margin_bytes` (~500 MB), vuelca a disco con `wav_append` (protección de memoria para libros largos).
 4. **Cancelación**: `debe_detenerse()` se consulta entre segmentos; si devuelve `True`, se exporta lo generado hasta ese momento.

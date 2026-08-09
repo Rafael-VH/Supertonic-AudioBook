@@ -31,7 +31,7 @@ class ExportadorAudio(Protocol):
     def wav_append(self, fragmentos: List[np.ndarray], ruta: Path) -> None:
         """Agrega fragmentos al final de un WAV PCM_16 existente.
 
-        Se usa para volcar a disco capítulos enormes sin perder lo ya
+        Se usa para volcar a disco archivos enormes sin perder lo ya
         escrito (protección de memoria).
 
         Args:

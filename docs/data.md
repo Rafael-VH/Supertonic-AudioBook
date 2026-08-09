@@ -42,7 +42,7 @@ Wrapper alrededor de `supertonic.TTS` que satisface el contrato `MotorTTS`. Es l
 | Validación de voz | En el primer uso: `engine.get_voice_style(voice_name=voz)`; si falla, `ValueError` con mensaje que sugiere `engine.list_voices()` |
 | Propiedades | `engine` y `style` exponen el estado lazy (aseguran inicialización y lanzan `assert`) |
 | `sintetizar(texto, *, steps, speed, lang=DEFAULT_LANG)` | Llama `engine.synthesize(texto, voice_style=style, lang=lang, total_steps=steps, speed=speed)`. Devuelve `np.atleast_1d(wav.squeeze()).astype(np.float32)` |
-| Tolerancia a fallos | Un error de síntesis → `log.error` y devuelve array vacío (no aborta el capítulo) |
+| Tolerancia a fallos | Un error de síntesis → `log.error` y devuelve array vacío (no aborta el archivo) |
 | Silencios | Fragmento de 0 muestras → warning y array vacío |
 
 ### `repositorio_archivos.py` — `RepositorioArchivosLocal`
@@ -55,7 +55,7 @@ Implementación con pathlib del contrato `RepositorioArchivos`.
 | `listar_archivos_md(carpeta="archivos")` | Filtra `.md` (case-insensitive) y ordena con **natural sort**. Carpeta inexistente o sin archivos → warning + lista vacía |
 | `leer_archivo(ruta)` | `ruta.read_text(encoding="utf-8")` |
 
-**Natural sort** (`_natural_sort_key`): extrae TODOS los números del `stem` del archivo y los usa como clave de orden. `capitulo2.md` → `(2,)`, `capitulo10.md` → `(10,)` (va después). Si no hay números, usa el nombre como string. `capitulo10` ordena después de `capitulo2` en vez de después de `capitulo9` como haría el sort lexicográfico.
+**Natural sort** (`_natural_sort_key`): extrae TODOS los números del `stem` del archivo y los usa como clave de orden. `archivo2.md` → `(2,)`, `archivo10.md` → `(10,)` (va después). Si no hay números, usa el nombre como string. `archivo10` ordena después de `archivo2` en vez de después de `archivo9` como haría el sort lexicográfico.
 
 ### `exportador_audio.py` — `ExportadorAudioSoundfile`
 

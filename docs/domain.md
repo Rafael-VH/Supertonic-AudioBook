@@ -4,15 +4,15 @@ Capa más interna: reglas de negocio PURAS. Solo importa stdlib y `numpy` (para 
 
 ## Entidades
 
-### `entities/capitulo.py` — `Capitulo`
+### `entities/archivo.py` — `Archivo`
 
 `@dataclass(frozen=True)` con un único atributo y dos propiedades derivadas:
 
 | Miembro | Tipo | Descripción |
 |---------|------|-------------|
 | `ruta` | `Path` | Ruta al archivo `.md` de entrada |
-| `nombre` (propiedad) | `str` | `ruta.name` (ej: `capitulo3.md`) |
-| `titulo` (propiedad) | `str` | `ruta.stem` (ej: `capitulo3`); da nombre al audio de salida |
+| `nombre` (propiedad) | `str` | `ruta.name` (ej: `archivo3.md`) |
+| `titulo` (propiedad) | `str` | `ruta.stem` (ej: `archivo3`); da nombre al audio de salida |
 
 ## Contratos (Protocols) — `repositories/`
 
@@ -84,13 +84,13 @@ Función pura que elimina sintaxis Markdown con `re.sub` en cadena: títulos (`#
 
 **Gotcha técnico** (`_dividir_en_oraciones`): Python `re` no soporta lookbehind de ancho variable, así que un patrón con alternancia de largos distintos crashea con `re.error`. La solución es reemplazar temporalmente el punto de cada abreviatura por un carácter neutro (`\x00`), partir por `re.split(r"(?<=\.)\s+", ...)` y restaurar los puntos.
 
-### `procesar_capitulo.py` — `ProcesarCapitulo` (el orquestador)
+### `procesar_archivo.py` — `ProcesarArchivo` (el orquestador)
 
 ```python
-ProcesarCapitulo(motor, archivos, exportador, *,
+ProcesarArchivo(motor, archivos, exportador, *,
                  silencio_muestras: int, memoria_safe_margin_bytes: int)
 
-procesar(capitulo: Capitulo, ruta_base: Path, *,
+procesar(archivo: Archivo, ruta_base: Path, *,
          steps: int, speed: float, formatos: List[str],
          lang: str = DEFAULT_LANG,
          on_progreso: Callable[[int, int], None] | None = None,
@@ -106,16 +106,16 @@ generar(texto: str, *, lang: str = DEFAULT_LANG, ruta: Path) -> Path
 ```
 
 Genera un WAV PCM corto con el motor y el exportador inyectados, sin pasar
-por el pipeline de capítulos. Lo usa la GUI para probar una voz con el idioma
+por el pipeline de archivos. Lo usa la GUI para probar una voz con el idioma
 seleccionado antes de procesar. Se compone en `main.py` con
 `fabrica_muestra(voz)`.
 
 - **Inyección de valores técnicos**: `silencio_muestras` y `memoria_safe_margin_bytes` NO se importan de `data/`; se inyectan desde la raíz de composición. El dominio no conoce `config.py`.
-- `ruta_base` es la ruta de salida sin extensión (ej: `audio/capitulo`); el método agrega `.formato`.
+- `ruta_base` es la ruta de salida sin extensión (ej: `audio/archivo`); el método agrega `.formato`.
 - Flujo completo: leer → limpiar → segmentar → sintetizar (con volcado por RAM) → exportar. Detalle en [architecture.md](architecture.md), sección "Pipeline".
 - Comportamientos clave:
   - Un segmento vacío (0 muestras) se omite sin abortar.
-  - Un capítulo que no se pudo leer o quedó vacío se omite con log.
+  - Un archivo que no se pudo leer o quedó vacío se omite con log.
   - Cancelación entre segmentos exporta lo generado hasta ahora.
   - Si no se generó NINGÚN fragmento: `log.error` y return sin archivos.
   - Al final loguea la duración real de cada archivo (`duracion_audio`).

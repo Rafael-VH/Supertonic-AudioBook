@@ -1,4 +1,4 @@
-"""Caso de uso: procesar un capítulo Markdown y exportarlo a audio.
+"""Caso de uso: procesar un archivo Markdown y exportarlo a audio.
 
 Orquesta el pipeline completo (leer → limpiar → segmentar → sintetizar →
 exportar) dependiendo SOLO de contratos de dominio y funciones puras.
@@ -14,7 +14,7 @@ from typing import Callable, List, Optional
 
 import numpy as np
 
-from domain.entities.capitulo import Capitulo
+from domain.entities.archivo import Archivo
 from domain.repositories.exportador_audio import ExportadorAudio
 from domain.repositories.motor_tts import DEFAULT_LANG, MotorTTS
 from domain.repositories.repositorio_archivos import RepositorioArchivos
@@ -24,12 +24,12 @@ from domain.use_cases.segmentar_texto import segmentar_texto
 log = logging.getLogger("lector")
 
 
-class ProcesarCapitulo:
-    """Orquesta la conversión de un capítulo Markdown a audios.
+class ProcesarArchivo:
+    """Orquesta la conversión de un archivo Markdown a audios.
 
     Args:
         motor: Motor de síntesis (contrato de dominio).
-        archivos: Acceso a los capítulos en disco (contrato de dominio).
+        archivos: Acceso a los archivos en disco (contrato de dominio).
         exportador: Escritura de audio (contrato de dominio).
         silencio_muestras: Muestras de silencio entre fragmentos.
         memoria_safe_margin_bytes: Umbral de RAM para volcado parcial.
@@ -52,7 +52,7 @@ class ProcesarCapitulo:
 
     def procesar(
         self,
-        capitulo: Capitulo,
+        archivo: Archivo,
         ruta_base: Path,
         *,
         steps: int,
@@ -62,11 +62,11 @@ class ProcesarCapitulo:
         on_progreso: Optional[Callable[[int, int], None]] = None,
         debe_detenerse: Optional[Callable[[], bool]] = None,
     ) -> None:
-        """Convierte un capítulo en audios en los formatos pedidos.
+        """Convierte un archivo en audios en los formatos pedidos.
 
         Args:
-            capitulo: Capítulo de entrada (entidad de dominio).
-            ruta_base: Ruta de salida sin extensión (ej: ``audio/capitulo``).
+            archivo: Archivo de entrada (entidad de dominio).
+            ruta_base: Ruta de salida sin extensión (ej: ``audio/archivo``).
             steps: Pasos de inferencia para el TTS.
             speed: Velocidad de habla.
             formatos: Formatos de salida (lista normalizada).
@@ -76,15 +76,15 @@ class ProcesarCapitulo:
                 síntesis entre segmentos y exporta lo generado hasta ahora.
         """
         log.info("=" * 50)
-        log.info("  Procesando: %s", capitulo.nombre)
+        log.info("  Procesando: %s", archivo.nombre)
         log.info("=" * 50)
 
         # --- Leer y limpiar ---
         log.info("Leyendo y limpiando Markdown...")
         try:
-            texto_plano = limpiar_markdown(self._archivos.leer_archivo(capitulo.ruta))
+            texto_plano = limpiar_markdown(self._archivos.leer_archivo(archivo.ruta))
         except Exception as exc:
-            log.error("No se pudo leer '%s': %s", capitulo.ruta, exc)
+            log.error("No se pudo leer '%s': %s", archivo.ruta, exc)
             return
 
         if not texto_plano.strip():

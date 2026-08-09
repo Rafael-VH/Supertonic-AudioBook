@@ -9,7 +9,7 @@ __pycache__/
 *.pyc
 *.pyo
 
-# Datos de entrada/salida (audio, capítulos, modelo offline)
+# Datos de entrada/salida (audio, archivos, modelo offline)
 audio/
 archivos/
 modelo/

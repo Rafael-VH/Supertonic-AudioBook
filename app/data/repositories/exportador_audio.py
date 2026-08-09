@@ -38,7 +38,7 @@ class ExportadorAudioSoundfile:
         soundfile no tiene append nativo para WAV, así que se escriben los
         samples crudos (int16 little-endian) al final del archivo y se
         parchea el header RIFF (tamaño de chunk y de datos). Esto permite
-        volcar capítulos enormes a disco sin perder lo ya escrito.
+        volcar archivos enormes a disco sin perder lo ya escrito.
         """
         if not fragmentos:
             return

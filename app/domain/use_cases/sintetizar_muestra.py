@@ -1,7 +1,7 @@
 """Caso de uso: sintetizar un audio de muestra para probar voz e idioma.
 
 Genera un WAV corto con el motor y el exportador inyectados, sin pasar por
-el pipeline completo de capítulos. Lo usa la GUI para que el usuario pruebe
+el pipeline completo de archivos. Lo usa la GUI para que el usuario pruebe
 una voz con el idioma seleccionado antes de procesar.
 """
 

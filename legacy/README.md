@@ -11,7 +11,7 @@
 
 ## Qué es
 
-`lector_fanfiction.py` convierte capítulos en formato Markdown (`.md`) a archivos de audio **WAV** usando síntesis de voz en español con el SDK `supertonic` TTS.
+`lector_fanfiction.py` convierte archivos en formato Markdown (`.md`) a archivos de audio **WAV** usando síntesis de voz en español con el SDK `supertonic` TTS.
 
 Flujo de trabajo:
 
@@ -19,7 +19,7 @@ Flujo de trabajo:
 2. Limpia el Markdown (encabezados, negritas, cursivas, enlaces, citas, listas, bloques de código, etc.).
 3. Segmenta el texto en fragmentos de hasta ~1500 caracteres para sintetizar.
 4. Sintetiza cada fragmento en español (voz `M1`, `total_steps=5`, `speed=1.1`), insertando 0.6 s de silencio entre fragmentos.
-5. Concatena todo y exporta un único WAV por capítulo en `audio/`.
+5. Concatena todo y exporta un único WAV por archivo en `audio/`.
 
 **Salida**: únicamente WAV a 44 100 Hz (no soporta otros formatos).
 
@@ -34,8 +34,8 @@ Flujo de trabajo:
 
 El script crea automáticamente las carpetas si no existen:
 
-- `archivos/` — entrada: coloca aquí los capítulos en Markdown (`.md`).
-- `audio/` — salida: un archivo WAV por capítulo (`audio/<nombre_del_capitulo>.wav`).
+- `archivos/` — entrada: coloca aquí los archivos en Markdown (`.md`).
+- `audio/` — salida: un WAV por archivo de entrada (`audio/<nombre_del_archivo>.wav`).
 
 Si `archivos/` está vacía o no tiene archivos `.md`, el script avisa y termina.
 
@@ -53,7 +53,7 @@ Si `archivos/` está vacía o no tiene archivos `.md`, el script avisa y termina
    pip install supertonic numpy soundfile
    ```
 
-2. Crea `archivos/` y coloca tus capítulos en Markdown (por ejemplo, `capitulo_01.md`).
+2. Crea `archivos/` y coloca tus archivos en Markdown (por ejemplo, `archivo_01.md`).
 
 3. Ejecuta:
 
@@ -63,11 +63,11 @@ Si `archivos/` está vacía o no tiene archivos `.md`, el script avisa y termina
 
    O simplemente haz doble clic en `iniciar_lector_fanfiction.bat`.
 
-4. Encuentra el audio resultante en `audio/capitulo_01.wav`.
+4. Encuentra el audio resultante en `audio/archivo_01.wav`.
 
 ## Limitaciones (razones para migrar a `../app/`)
 
 - Solo exporta WAV.
-- Voz fija `M1`, sin selección por capítulo.
+- Voz fija `M1`, sin selección por archivo.
 - Sin interfaz gráfica, sin barra de progreso visual ni opciones de configuración.
 - Mensajes de progreso solo por consola.
