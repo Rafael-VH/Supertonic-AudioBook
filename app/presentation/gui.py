@@ -191,8 +191,11 @@ APP_VERSION: str = "1.0.3"
 REPOSITORIO_URL: str = "https://github.com/Rafael-VH/Supertonic-AudioBook"
 """URL del repositorio público (enlace de la sección Acerca de)."""
 
-MODELO_URL: str = "https://huggingface.co/supertone-inc/supertonic-3"
+MODELO_URL: str = "https://huggingface.co/Supertone/supertonic-3"
 """URL del modelo TTS (créditos de la sección Acerca de)."""
+
+MODELO_GITHUB_URL: str = "https://github.com/supertone-inc/supertonic"
+"""URL del código fuente del modelo TTS (créditos de la sección Acerca de)."""
 
 IDIOMAS: dict = {"es": "Español", "en": "English"}
 """Idiomas disponibles para la interfaz (código -> nombre mostrado)."""
@@ -215,6 +218,7 @@ TRADUCCIONES: dict = {
         "acerca_licencia": "Licencia MIT",
         "acerca_creditos": "Modelo de voz: Supertonic 3, de Supertone Inc. (licencia OpenRAIL-M)",
         "acerca_ver_modelo": "Ver el modelo en Hugging Face",
+        "acerca_ver_codigo": "Código fuente del modelo",
         "acerca_abrir_repositorio": "Abrir repositorio en GitHub",
         "cerrar": "Cerrar",
         "tab_entrada": "Entrada y salida",
@@ -299,6 +303,7 @@ TRADUCCIONES: dict = {
         "acerca_licencia": "MIT License",
         "acerca_creditos": "Speech model: Supertonic 3, by Supertone Inc. (OpenRAIL-M license)",
         "acerca_ver_modelo": "View the model on Hugging Face",
+        "acerca_ver_codigo": "Model source code",
         "acerca_abrir_repositorio": "Open repository on GitHub",
         "cerrar": "Close",
         "tab_entrada": "Input & output",
@@ -881,6 +886,12 @@ class AppLector(tk.Tk):
             style="Enlace.TButton",
             command=self._abrir_modelo,
         ).pack(anchor="w", pady=(2, 0))
+        ttk.Button(
+            f_acerca,
+            text=self.t("acerca_ver_codigo"),
+            style="Enlace.TButton",
+            command=self._abrir_modelo_codigo,
+        ).pack(anchor="w", pady=(2, 0))
         ttk.Label(
             f_acerca,
             text=self.t("acerca_licencia"),
@@ -922,6 +933,9 @@ class AppLector(tk.Tk):
 
     def _abrir_modelo(self) -> None:
         self._abrir_enlace(MODELO_URL)
+
+    def _abrir_modelo_codigo(self) -> None:
+        self._abrir_enlace(MODELO_GITHUB_URL)
 
     def _aplicar_estilo_desde_ajustes(self) -> None:
         self._aplicar_tema(self._tema_oscuro, estilo=self._var_estilo_ajustes.get())

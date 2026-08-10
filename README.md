@@ -164,7 +164,7 @@ copiá `modelo/` en `app/dist/SupertonicAudioBook` antes de construir.
 ## Créditos
 
 Supertonic-AudioBook es un proyecto independiente que usa el motor de síntesis
-[Supertonic 3](https://huggingface.co/supertone-inc/supertonic-3) de [Supertone Inc.](https://www.supertone.ai/)
+[Supertonic 3](https://huggingface.co/Supertone/supertonic-3) de [Supertone Inc.](https://www.supertone.ai/)
 — TTS local, on-device, de 99M parámetros con soporte para 31 idiomas. El modelo se distribuye bajo la
 licencia OpenRAIL-M; consultá los términos en el [repositorio del modelo](https://huggingface.co/Supertone/supertonic-3).
 
