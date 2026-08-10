@@ -40,10 +40,10 @@ Entrada: `AppLector(*, fabrica_use_case, repositorio, carpeta_base, repositorio_
 |----------|---------|
 | `VOCES` | `("M1".."M5", "F1".."F5")` — 10 voces del modelo |
 | Tema | Claro/oscuro con paleta Material Design 3 (`PALETA_CLARA`/`PALETA_OSCURA`) |
-| Estilo | Material (actual) o Neumorfismo (`_estilo_neumo`). El neumorfismo simula los biseles luz/sombra del soft UI con `relief` + `lightcolor`/`darkcolor` de clam (`_configurar_estilo_neumo`), se combina con claro/oscuro (`NEUMO_CLARA`/`NEUMO_OSCURA` sobre las paletas base) y se persiste en la clave `estilo` |
+| Estilo | Material (actual), Neumorfismo o Skeuomorfismo (`_estilo`, valores en `ESTILOS`). El neumorfismo simula los biseles luz/sombra del soft UI con `relief` + `lightcolor`/`darkcolor` de clam (`_configurar_estilo_neumo`, superficie = fondo); el skeuomorfismo imita botones 3D con biseles y bordes marcados, entradas hundidas y acento azul acero (`_configurar_estilo_skeuo`, superficie distinta del fondo). Ambos se combinan con claro/oscuro (`NEUMO_*`/`SKEUO_*` sobre las paletas base) y se persisten en la clave `estilo` |
 | Idioma | Español/Inglés (`IDIOMAS`/`TRADUCCIONES`); `self.t(clave)` traduce todos los textos. Se cambia desde Ajustes y se persiste |
 | Cabecera | Título + botón de ajustes (`⚙`) que abre la ventana flotante de configuración (`_abrir_ajustes`) |
-| Ventana de ajustes | `tk.Toplevel` transiente centrada sobre la principal; muestra la configuración del programa. Secciones: **Tema** (Claro/Oscuro, aplica y guarda al instante), **Estilo** (Material/Neumorfismo, aplica y guarda al instante) e **Idioma** (combobox Español/Inglés, reconstruye la UI al cambiar). Estructurada para sumar más secciones (voz, formatos, etc.) |
+| Ventana de ajustes | `tk.Toplevel` transiente centrada sobre la principal; muestra la configuración del programa. Secciones: **Tema** (Claro/Oscuro, aplica y guarda al instante), **Estilo** (Material/Neumorfismo/Skeuomorfismo, aplica y guarda al instante) e **Idioma** (combobox Español/Inglés, reconstruye la UI al cambiar). Estructurada para sumar más secciones (voz, formatos, etc.) |
 | Pestañas | `ttk.Notebook`: "Entrada y salida" (carpetas + lista) y "Síntesis y registro" (opciones + log) |
 | Layout responsive | Bajo `UMBRAL_ANCHO` (900 px) usa pestañas; a partir de ahí muestra ambos paneles lado a lado en columnas (`_modo_columnas`/`_modo_pestanas`) |
 | Carpeta de origen | Entry + "Examinar…", en tarjeta propia separada de la lista |

@@ -141,6 +141,46 @@ NEUMO_OSCURA: dict = {
 }
 """Overrides neumórficos para el tema oscuro (se combinan con ``PALETA_OSCURA``)."""
 
+SKEUO_CLARA: dict = {
+    "fondo": "#DEDEDE",
+    "superficie": "#EBEBEB",
+    "superficie_variante": "#CDCDCD",
+    "borde": "#9B9B9B",
+    "luz": "#FFFFFF",
+    "sombra": "#7F7F7F",
+    "primario": "#2E6DB4",
+    "primario_claro": "#D3E3F6",
+    "primario_vivo": "#3E7FC9",
+    "primario_luz": "#7FA8DE",
+    "primario_sombra": "#1F4A79",
+    "sobre_primario": "#FFFFFF",
+}
+"""Overrides skeuomórficos para el tema claro (se combinan con ``PALETA_CLARA``).
+
+El skeuomorfismo imita botones físicos: superficies grises neutras, biseles
+marcados (``luz``/``sombra``) y acento azul acero. La superficie difiere del
+fondo y los botones se hunden al presionarlos (inset).
+"""
+
+SKEUO_OSCURA: dict = {
+    "fondo": "#3C3C3C",
+    "superficie": "#484848",
+    "superficie_variante": "#333333",
+    "borde": "#606060",
+    "luz": "#5C5C5C",
+    "sombra": "#222222",
+    "primario": "#4D8CD6",
+    "primario_claro": "#314B69",
+    "primario_vivo": "#5F9BE4",
+    "primario_luz": "#8AB4EA",
+    "primario_sombra": "#1E3A5C",
+    "sobre_primario": "#FFFFFF",
+}
+"""Overrides skeuomórficos para el tema oscuro (se combinan con ``PALETA_OSCURA``)."""
+
+ESTILOS: tuple = ("material", "neumo", "skeuo")
+"""Estilos de interfaz disponibles (clave persistida en la preferencia ``estilo``)."""
+
 IDIOMAS: dict = {"es": "Español", "en": "English"}
 """Idiomas disponibles para la interfaz (código -> nombre mostrado)."""
 
@@ -155,6 +195,7 @@ TRADUCCIONES: dict = {
         "estilo": "Estilo",
         "estilo_material": "Material (actual)",
         "estilo_neumorfismo": "Neumorfismo",
+        "estilo_skeuomorfismo": "Skeuomorfismo",
         "cerrar": "Cerrar",
         "tab_entrada": "Entrada y salida",
         "tab_sintesis": "Síntesis y registro",
@@ -231,6 +272,7 @@ TRADUCCIONES: dict = {
         "estilo": "Style",
         "estilo_material": "Material (current)",
         "estilo_neumorfismo": "Neumorphism",
+        "estilo_skeuomorfismo": "Skeuomorphism",
         "cerrar": "Close",
         "tab_entrada": "Input & output",
         "tab_sintesis": "Synthesis & log",
@@ -343,7 +385,7 @@ class AppLector(tk.Tk):
         self._repositorio_preferencias = repositorio_preferencias
 
         self._tema_oscuro = False
-        self._estilo_neumo = False
+        self._estilo = "material"
         self._paleta = dict(PALETA_CLARA)
         self._preferencias_cargadas = self._repositorio_preferencias.cargar()
 
@@ -754,11 +796,12 @@ class AppLector(tk.Tk):
         # --- Estilo ---
         f_estilo = ttk.LabelFrame(marco, text=self.t("estilo"), style="Tarjeta.TLabelframe", padding=10)
         f_estilo.pack(fill="x", pady=(10, 0))
-        var_estilo = tk.StringVar(value="neumo" if self._estilo_neumo else "material")
+        var_estilo = tk.StringVar(value=self._estilo)
         self._var_estilo_ajustes = var_estilo
         for valor, etiqueta in (
             ("material", self.t("estilo_material")),
             ("neumo", self.t("estilo_neumorfismo")),
+            ("skeuo", self.t("estilo_skeuomorfismo")),
         ):
             ttk.Radiobutton(
                 f_estilo,
@@ -800,10 +843,7 @@ class AppLector(tk.Tk):
         self._guardar_preferencias()
 
     def _aplicar_estilo_desde_ajustes(self) -> None:
-        self._aplicar_tema(
-            self._tema_oscuro,
-            neumo=self._var_estilo_ajustes.get() == "neumo",
-        )
+        self._aplicar_tema(self._tema_oscuro, estilo=self._var_estilo_ajustes.get())
         self._guardar_preferencias()
 
     def _aplicar_idioma_desde_ajustes(self, *_args) -> None:
@@ -845,13 +885,15 @@ class AppLector(tk.Tk):
             self._abrir_ajustes()
         self._set_ejecutando(self._en_ejecucion)
 
-    def _aplicar_tema(self, oscuro: bool, neumo: Optional[bool] = None) -> None:
+    def _aplicar_tema(self, oscuro: bool, estilo: Optional[str] = None) -> None:
         self._tema_oscuro = oscuro
-        if neumo is not None:
-            self._estilo_neumo = neumo
+        if estilo in ESTILOS:
+            self._estilo = estilo
         c = dict(PALETA_OSCURA if oscuro else PALETA_CLARA)
-        if self._estilo_neumo:
+        if self._estilo == "neumo":
             c.update(NEUMO_OSCURA if oscuro else NEUMO_CLARA)
+        elif self._estilo == "skeuo":
+            c.update(SKEUO_OSCURA if oscuro else SKEUO_CLARA)
         self._paleta = c
 
         estilo = ttk.Style(self)
@@ -1068,8 +1110,10 @@ class AppLector(tk.Tk):
         )
         estilo.map("Vertical.TScrollbar", background=[("active", c["primario"])])
 
-        if self._estilo_neumo:
+        if self._estilo == "neumo":
             self._configurar_estilo_neumo(estilo, c)
+        elif self._estilo == "skeuo":
+            self._configurar_estilo_skeuo(estilo, c)
 
         self.configure(bg=c["fondo"])
         self._estilizar_no_ttk()
@@ -1246,56 +1290,208 @@ class AppLector(tk.Tk):
         )
         estilo.map("Vertical.TScrollbar", background=[("active", c["primario"])])
 
+    def _configurar_estilo_skeuo(self, estilo: ttk.Style, c: dict) -> None:
+        """Ajusta los estilos base al look skeuomórfico (botones físicos).
+
+        Imita el bisel profundo de los botones 3D clásicos: relieve ``raised``
+        con ``lightcolor``/``darkcolor`` marcados y bordes visibles; las
+        entradas quedan hundidas (inset) y los chips se hunden al deseleccionar
+        y se elevan al seleccionar. La superficie difiere del fondo.
+        """
+        superficie = c["superficie"]
+
+        # Tarjetas: elevadas con bisel y borde visibles
+        estilo.configure(
+            "Tarjeta.TLabelframe",
+            background=superficie,
+            bordercolor=c["borde"],
+            relief="raised",
+            borderwidth=2,
+            lightcolor=c["luz"],
+            darkcolor=c["sombra"],
+        )
+        estilo.configure("Tarjeta.TLabelframe.Label", background=superficie)
+
+        # Botón estándar: botón físico elevado que se hunde al presionar
+        estilo.configure(
+            "TButton",
+            background=superficie,
+            foreground=c["primario"],
+            bordercolor=c["borde"],
+            borderwidth=2,
+            relief="raised",
+            lightcolor=c["luz"],
+            darkcolor=c["sombra"],
+            padding=(14, 8),
+            font=("Segoe UI", 10),
+            focusthickness=0,
+        )
+        estilo.map(
+            "TButton",
+            relief=[("pressed", "sunken"), ("active", "raised")],
+            background=[("active", c["primario_claro"])],
+            foreground=[("active", c["primario"])],
+        )
+
+        # Botón de acción: relleno primario con bisel profundo azul acero
+        estilo.configure(
+            "Principal.TButton",
+            background=c["primario"],
+            foreground=c["sobre_primario"],
+            borderwidth=2,
+            relief="raised",
+            lightcolor=c["primario_luz"],
+            darkcolor=c["primario_sombra"],
+            padding=(18, 9),
+            font=("Segoe UI", 10, "bold"),
+            focusthickness=0,
+        )
+        estilo.map(
+            "Principal.TButton",
+            relief=[("pressed", "sunken")],
+            background=[
+                ("active", c["primario_vivo"]),
+                ("disabled", c["superficie_variante"]),
+            ],
+            foreground=[("disabled", c["texto_secundario"])],
+        )
+
+        # Entradas y combos: hundidos sobre el fondo (pozos de entrada)
+        estilo.configure(
+            "TEntry",
+            fieldbackground=c["fondo"],
+            foreground=c["texto"],
+            insertcolor=c["texto"],
+            bordercolor=c["borde"],
+            lightcolor=c["luz"],
+            darkcolor=c["sombra"],
+            borderwidth=2,
+            padding=(8, 6),
+        )
+        estilo.map("TEntry", bordercolor=[("focus", c["primario"])])
+        estilo.configure(
+            "TCombobox",
+            fieldbackground=c["fondo"],
+            foreground=c["texto"],
+            arrowcolor=c["primario"],
+            bordercolor=c["borde"],
+            lightcolor=c["luz"],
+            darkcolor=c["sombra"],
+            borderwidth=2,
+        )
+        estilo.map(
+            "TCombobox",
+            fieldbackground=[("readonly", c["fondo"])],
+            foreground=[("readonly", c["texto"])],
+        )
+
+        # Checkbuttons y radiobuttons sobre superficie neutra
+        estilo.configure(
+            "TCheckbutton",
+            background=superficie,
+            foreground=c["texto"],
+            focuscolor=c["fondo"],
+        )
+        estilo.map(
+            "TCheckbutton",
+            background=[("active", superficie)],
+            indicatorcolor=[("selected", c["primario"]), ("!selected", c["fondo"])],
+        )
+        estilo.configure(
+            "TRadiobutton",
+            background=superficie,
+            foreground=c["texto"],
+            focuscolor=c["fondo"],
+        )
+        estilo.map(
+            "TRadiobutton",
+            background=[("active", superficie)],
+            indicatorcolor=[("selected", c["primario"]), ("!selected", c["fondo"])],
+        )
+
+        # Chip de formato: hundido; seleccionado = elevado con acento
+        estilo.configure(
+            "Chip.TCheckbutton",
+            background=c["superficie_variante"],
+            foreground=c["texto"],
+            indicatorcolor=c["superficie_variante"],
+            bordercolor=c["borde"],
+            borderwidth=2,
+            relief="sunken",
+            lightcolor=c["luz"],
+            darkcolor=c["sombra"],
+            padding=(12, 6),
+            focuscolor=c["fondo"],
+        )
+        estilo.map(
+            "Chip.TCheckbutton",
+            relief=[("selected", "raised")],
+            background=[("selected", c["primario_claro"]), ("active", c["primario_claro"])],
+            foreground=[("selected", c["primario"]), ("active", c["texto"])],
+            indicatorcolor=[("selected", c["primario"]), ("!selected", c["superficie_variante"])],
+        )
+
+        # Slider, barra de progreso y scrollbar: canal hundido
+        estilo.configure(
+            "Horizontal.TScale",
+            background=superficie,
+            troughcolor=c["superficie_variante"],
+            borderwidth=1,
+            relief="sunken",
+            lightcolor=c["luz"],
+            darkcolor=c["sombra"],
+        )
+        estilo.map("Horizontal.TScale", background=[("active", superficie)])
+        estilo.configure(
+            "Horizontal.TProgressbar",
+            background=c["primario"],
+            troughcolor=c["superficie_variante"],
+            borderwidth=1,
+            relief="sunken",
+            lightcolor=c["luz"],
+            darkcolor=c["sombra"],
+        )
+        estilo.configure(
+            "Vertical.TScrollbar",
+            background=c["superficie_variante"],
+            troughcolor=c["fondo"],
+            borderwidth=0,
+            arrowcolor=c["texto_secundario"],
+        )
+        estilo.map("Vertical.TScrollbar", background=[("active", c["primario"])])
+
     def _estilizar_no_ttk(self) -> None:
         c = self._paleta
-        if self._estilo_neumo:
+        if self._estilo == "neumo":
             superficie = c["fondo"]
-            self._lienzo.configure(bg=superficie, relief="sunken", bd=1, highlightthickness=0)
-            self._contenedor_check.configure(bg=superficie)
-            for check in self._checks.values():
-                check.configure(
-                    bg=superficie,
-                    fg=c["texto"],
-                    activebackground=superficie,
-                    activeforeground=c["texto"],
-                    selectcolor=superficie,
-                    bd=0,
-                    highlightthickness=0,
-                )
-            self._txt.configure(
-                bg=superficie,
-                fg=c["texto"],
-                insertbackground=c["texto"],
-                selectbackground=c["primario"],
-                selectforeground=c["sobre_primario"],
-                relief="sunken",
-                bd=1,
-                highlightthickness=0,
-            )
-            self._txt.tag_configure("info", foreground=c["texto"])
-            self._txt.tag_configure("warning", foreground=c["advertencia"])
-            self._txt.tag_configure("error", foreground=c["error"])
-            self._txt.tag_configure("debug", foreground=c["texto_secundario"])
-            return
-
-        self._lienzo.configure(bg=c["superficie"])
-        self._contenedor_check.configure(bg=c["superficie"])
+            relief, bd, select = "sunken", 1, superficie
+        elif self._estilo == "skeuo":
+            superficie = c["superficie"]
+            relief, bd, select = "sunken", 2, c["fondo"]
+        else:
+            superficie = c["superficie"]
+            relief, bd, select = "flat", 1, c["fondo"]
+        self._lienzo.configure(bg=superficie, relief=relief, bd=bd, highlightthickness=0)
+        self._contenedor_check.configure(bg=superficie)
         for check in self._checks.values():
             check.configure(
-                bg=c["superficie"],
+                bg=superficie,
                 fg=c["texto"],
-                activebackground=c["superficie"],
+                activebackground=superficie,
                 activeforeground=c["texto"],
-                selectcolor=c["fondo"],
+                selectcolor=select,
+                bd=0,
+                highlightthickness=0,
             )
         self._txt.configure(
-            bg=c["superficie"],
+            bg=superficie,
             fg=c["texto"],
             insertbackground=c["texto"],
             selectbackground=c["primario"],
             selectforeground=c["sobre_primario"],
-            relief="flat",
-            borderwidth=1,
+            relief=relief,
+            bd=bd,
+            highlightthickness=0,
         )
         self._txt.tag_configure("info", foreground=c["texto"])
         self._txt.tag_configure("warning", foreground=c["advertencia"])
@@ -1398,7 +1594,7 @@ class AppLector(tk.Tk):
     def _preferencias_actuales(self) -> Dict[str, object]:
         return {
             "tema_oscuro": self._tema_oscuro,
-            "estilo": "neumo" if self._estilo_neumo else "material",
+            "estilo": self._estilo,
             "idioma": self._idioma,
             "voz": self._var_voz.get(),
             "steps": int(round(self._var_steps.get())),
@@ -1418,8 +1614,8 @@ class AppLector(tk.Tk):
     def _aplicar_preferencias(self, prefs: Dict[str, object]) -> None:
         if not isinstance(prefs, dict):
             return
-        if isinstance(prefs.get("estilo"), str):
-            self._estilo_neumo = prefs["estilo"] == "neumo"
+        if isinstance(prefs.get("estilo"), str) and prefs["estilo"] in ESTILOS:
+            self._estilo = prefs["estilo"]
         if isinstance(prefs.get("voz"), str) and prefs["voz"] in VOCES:
             self._var_voz.set(prefs["voz"])
         if isinstance(prefs.get("steps"), int):
