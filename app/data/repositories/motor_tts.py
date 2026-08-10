@@ -88,8 +88,8 @@ class MotorSupertonic:
                 speed=speed,
             )
         except Exception as exc:
-            log.error("Error sintetizando texto (%.60s...): %s", texto, exc)
-            return np.array([], dtype=np.float32)
+            log.error("Error al sintetizar texto (%.60s...): %s", texto, exc)
+            raise RuntimeError(f"Error en motor TTS al sintetizar fragmento: {exc}") from exc
 
         if wav.size == 0:
             log.warning("Fragmento silencioso (0 muestras). Se omite.")

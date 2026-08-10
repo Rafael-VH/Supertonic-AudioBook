@@ -37,14 +37,14 @@ class ExportadorAudioSoundfile:
 
         soundfile no tiene append nativo para WAV, así que se escriben los
         samples crudos (int16 little-endian) al final del archivo y se
-        parchea el header RIFF (tamaño de chunk y de datos). Esto permite
-        volcar archivos enormes a disco sin perder lo ya escrito.
+        parchea dinámicamente el header RIFF (localizando el chunk 'data'). Esto
+        permite volcar archivos enormes a disco sin perder lo ya escrito.
         """
         if not fragmentos:
             return
         audio = np.concatenate(fragmentos, dtype=np.float32)
         pcm16 = np.clip(audio, -1.0, 1.0)
-        pcm16 = (pcm16 * 32767.0).astype(np.int16)
+        pcm16 = (pcm16 * 32767.0).astype("<i2")
         ruta.parent.mkdir(exist_ok=True)
 
         if not ruta.exists() or ruta.stat().st_size == 0:
@@ -58,20 +58,44 @@ class ExportadorAudioSoundfile:
         with ruta.open("r+b") as f:
             f.seek(4)
             f.write(struct.pack("<I", tamaño - 8))
-            f.seek(40)
-            f.write(struct.pack("<I", tamaño - 44))
+            f.seek(12)  # Pasado RIFF header ('RIFFxxxxWAVE')
+            while True:
+                cabecera_chunk = f.read(8)
+                if len(cabecera_chunk) < 8:
+                    break
+                chunk_id, chunk_size = struct.unpack("<4sI", cabecera_chunk)
+                if chunk_id == b"data":
+                    pos_size = f.tell() - 4
+                    data_offset = f.tell()
+                    nuevo_tamaño_data = tamaño - data_offset
+                    f.seek(pos_size)
+                    f.write(struct.pack("<I", nuevo_tamaño_data))
+                    break
+                # Saltar payload del chunk (con alineación par)
+                offset_salto = chunk_size + (chunk_size % 2)
+                f.seek(offset_salto, 1)
 
     def convertir_desde_wav(self, ruta_wav: Path, ruta_destino: Path, formato: str) -> None:
-        """Re-encoda un WAV existente al formato indicado (ver contrato).
+        """Re-encoda un WAV existente al formato indicado de forma eficiente en RAM.
 
-        Precaución: ``sf.read`` carga el WAV COMPLETO a RAM como float64.
-        En libros enormes que dispararon flushes de memoria (~500 MB de
-        límite), esto puede picos de 2-4 GB. El flush acota la RAM de
-        síntesis, no la de conversión.
+        Lee y escribe en bloques (chunks) usando ``sf.SoundFile`` para no
+        cargar el archivo WAV completo en memoria RAM.
         """
-        data, sr = sf.read(str(ruta_wav))
         ruta_destino.parent.mkdir(exist_ok=True)
-        sf.write(str(ruta_destino), data, sr, subtype=SUBTIPOS_AUDIO[formato])
+        fmt_key = formato.lower()
+        subtype = SUBTIPOS_AUDIO.get(fmt_key)
+        with sf.SoundFile(str(ruta_wav), mode="r") as f_in:
+            sr = f_in.samplerate
+            channels = f_in.channels
+            with sf.SoundFile(
+                str(ruta_destino),
+                mode="w",
+                samplerate=sr,
+                channels=channels,
+                subtype=subtype,
+            ) as f_out:
+                for block in f_in.blocks(blocksize=65536, dtype="float32"):
+                    f_out.write(block)
 
     def duracion_audio(self, ruta: Path) -> float:
         """Devuelve la duración de un archivo de audio en segundos (ver contrato).

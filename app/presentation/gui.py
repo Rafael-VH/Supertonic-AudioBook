@@ -159,10 +159,12 @@ TRADUCCIONES: dict = {
         "estado_cancelando": "Cancelando (exporta lo generado hasta ahora)…",
         "estado_cancelado": "Cancelado por el usuario.",
         "estado_error": "Error.",
+        "estado_con_errores": "Completado con errores: {exitos}/{total} OK, {errores} error/es.",
         "snackbar_formato": "Elegí al menos un formato de salida.",
         "snackbar_sin_md": "No hay archivos .md en la carpeta de entrada.",
         "snackbar_procesado": "Se procesaron {n} archivo(s) en {tiempo}.",
         "snackbar_exportado": "Se exportó lo generado hasta el momento.",
+        "snackbar_con_errores": "{exitos} procesado(s), {errores} error(es) en {tiempo}.",
         "conteo_seleccionados": "{sel}/{total} seleccionados",
         "conteo_archivos": "{total} archivos",
         "conteo_sin": "Sin archivos",
@@ -179,6 +181,7 @@ TRADUCCIONES: dict = {
         "log_segmento": "      Segmento {actual}/{total} sintetizado…",
         "log_archivo_fin": "✔ Archivo {i}/{n} terminado.",
         "log_completado": "✔ PROCESAMIENTO COMPLETADO: {n} archivo(s) en {tiempo}.",
+        "log_con_errores": "Finalizado con {errores} error(es) de {total} archivo(s).",
         "log_cancelado": "✖ Procesamiento cancelado por el usuario tras {tiempo}.",
         "log_error": "✖ ERROR: {texto}",
         "tiempo_seg": "{total} s",
@@ -229,10 +232,12 @@ TRADUCCIONES: dict = {
         "estado_cancelando": "Cancelling (exports what was generated so far)…",
         "estado_cancelado": "Cancelled by the user.",
         "estado_error": "Error.",
+        "estado_con_errores": "Finished with errors: {exitos}/{total} OK, {errores} error(s).",
         "snackbar_formato": "Choose at least one output format.",
         "snackbar_sin_md": "There are no .md files in the input folder.",
         "snackbar_procesado": "{n} file(s) processed in {tiempo}.",
         "snackbar_exportado": "Exported what was generated so far.",
+        "snackbar_con_errores": "{exitos} processed, {errores} error(s) in {tiempo}.",
         "conteo_seleccionados": "{sel}/{total} selected",
         "conteo_archivos": "{total} files",
         "conteo_sin": "No files",
@@ -249,6 +254,7 @@ TRADUCCIONES: dict = {
         "log_segmento": "      Segment {actual}/{total} synthesized…",
         "log_archivo_fin": "✔ File {i}/{n} finished.",
         "log_completado": "✔ PROCESSING COMPLETED: {n} file(s) in {tiempo}.",
+        "log_con_errores": "Finished with {errores} error(s) out of {total} file(s).",
         "log_cancelado": "✖ Processing cancelled by the user after {tiempo}.",
         "log_error": "✖ ERROR: {texto}",
         "tiempo_seg": "{total} s",
@@ -776,6 +782,7 @@ class AppLector(tk.Tk):
         if self._ventana_ajustes is not None and self._ventana_ajustes.winfo_exists():
             self._cerrar_ajustes()
             self._abrir_ajustes()
+        self._set_ejecutando(self._en_ejecucion)
 
     def _aplicar_tema(self, oscuro: bool) -> None:
         self._tema_oscuro = oscuro
@@ -1207,9 +1214,19 @@ class AppLector(tk.Tk):
         log.info(
             self.t("log_inicio").format(sel=len(self._seleccion), total=len(self._archivos))
         )
+        voz = self._var_voz.get()
+        steps = int(round(self._var_steps.get()))
+        speed = float(self._var_speed.get())
+        lang = self._codigo_idioma_voz()
+        salida = Path(self._var_carpeta_out.get())
+
         self._set_ejecutando(True)
         self._cancelar.clear()
-        self._hilo = threading.Thread(target=self._trabajo, daemon=True)
+        self._hilo = threading.Thread(
+            target=self._trabajo,
+            args=(formatos, voz, steps, speed, lang, salida),
+            daemon=True,
+        )
         self._hilo.start()
 
     def _cancelar_accion(self) -> None:
@@ -1250,15 +1267,17 @@ class AppLector(tk.Tk):
         finally:
             self._cola.put(("btn_muestra",))
 
-    def _trabajo(self) -> None:
+    def _trabajo(
+        self,
+        formatos: List[str],
+        voz: str,
+        steps: int,
+        speed: float,
+        lang: str,
+        salida: Path,
+    ) -> None:
         inicio = time.monotonic()
         try:
-            formatos = [f for f in FORMATOS_NATIVOS if self._var_formato[f].get()]
-            voz = self._var_voz.get()
-            steps = int(round(self._var_steps.get()))
-            speed = float(self._var_speed.get())
-            lang = self._codigo_idioma_voz()
-            salida = Path(self._var_carpeta_out.get())
             self._repositorio.crear_carpetas_si_no_existen(str(salida))
 
             log.info("=" * 60)
@@ -1275,24 +1294,32 @@ class AppLector(tk.Tk):
 
             use_case = self._fabrica_use_case(voz)
             total_archivos = len(self._seleccion)
+            exitos = 0
+            errores = 0
             for i, ruta in enumerate(self._seleccion, 1):
                 if self._cancelar.is_set():
                     break
                 self._cola.put(("archivo", i, total_archivos, ruta.name))
                 log.info(self.t("log_archivo").format(i=i, n=total_archivos, nombre=ruta.name))
-                use_case.procesar(
-                    Archivo(ruta),
-                    salida / ruta.stem,
-                    steps=steps,
-                    speed=speed,
-                    lang=lang,
-                    formatos=formatos,
-                    on_progreso=self._cb_progreso,
-                    debe_detenerse=self._cb_detenerse,
-                )
-                log.info(self.t("log_archivo_fin").format(i=i, n=total_archivos))
+                try:
+                    use_case.procesar(
+                        Archivo(ruta),
+                        salida / ruta.stem,
+                        steps=steps,
+                        speed=speed,
+                        lang=lang,
+                        formatos=formatos,
+                        on_progreso=self._cb_progreso,
+                        debe_detenerse=self._cb_detenerse,
+                    )
+                    log.info(self.t("log_archivo_fin").format(i=i, n=total_archivos))
+                    exitos += 1
+                except Exception as exc:
+                    errores += 1
+                    logging.getLogger("gui").exception("Error procesando el archivo '%s'", ruta.name)
+                    self._cola.put(("log", "error", f"Error en {ruta.name}: {exc}"))
             elapsed = time.monotonic() - inicio
-            self._cola.put(("fin", not self._cancelar.is_set(), total_archivos, elapsed))
+            self._cola.put(("fin", not self._cancelar.is_set(), exitos, errores, total_archivos, elapsed))
         except Exception as exc:
             logging.getLogger("gui").exception("Error en el hilo de trabajo")
             self._cola.put(("error", str(exc)))
@@ -1339,17 +1366,26 @@ class AppLector(tk.Tk):
             self._lbl_porcentaje.config(text=f"{pct:.0f}%")
             self._lbl_estado.config(text=self.t("estado_segmentos").format(actual=actual, total=total))
         elif tipo == "fin":
-            _, exito, n, elapsed = msg
+            _, finalizado_ok, exitos, errores, total_archivos, elapsed = msg
             self._set_ejecutando(False)
             texto_elapsed = self._formatear_tiempo(elapsed)
-            if exito:
+            if finalizado_ok and errores == 0:
                 self._barra.config(value=100)
                 self._lbl_porcentaje.config(text="100%")
-                self._lbl_estado.config(text=self.t("estado_listo_n").format(n=n, tiempo=texto_elapsed))
-                self._mostrar_snackbar(self.t("snackbar_procesado").format(n=n, tiempo=texto_elapsed))
+                self._lbl_estado.config(text=self.t("estado_listo_n").format(n=exitos, tiempo=texto_elapsed))
+                self._mostrar_snackbar(self.t("snackbar_procesado").format(n=exitos, tiempo=texto_elapsed))
                 log.info("=" * 60)
-                log.info(self.t("log_completado").format(n=n, tiempo=texto_elapsed))
+                log.info(self.t("log_completado").format(n=exitos, tiempo=texto_elapsed))
                 log.info("=" * 60)
+            elif finalizado_ok and errores > 0:
+                self._lbl_estado.config(
+                    text=self.t("estado_con_errores").format(exitos=exitos, total=total_archivos, errores=errores)
+                )
+                self._mostrar_snackbar(
+                    self.t("snackbar_con_errores").format(exitos=exitos, errores=errores, tiempo=texto_elapsed),
+                    "error",
+                )
+                log.warning(self.t("log_con_errores").format(errores=errores, total=total_archivos))
             else:
                 self._lbl_estado.config(text=self.t("estado_cancelado"))
                 self._mostrar_snackbar(self.t("snackbar_exportado"))
@@ -1374,6 +1410,10 @@ class AppLector(tk.Tk):
     def _escribir_log(self, texto: str, nivel: str = "info") -> None:
         self._txt.config(state="normal")
         self._txt.insert("end", texto + "\n", nivel if nivel in ("info", "warning", "error", "debug") else "info")
+        idx_final = self._txt.index("end-1c")
+        num_lineas = int(idx_final.split(".")[0])
+        if num_lineas > 3000:
+            self._txt.delete("1.0", f"{num_lineas - 2500}.0")
         self._txt.see("end")
         self._txt.config(state="disabled")
 

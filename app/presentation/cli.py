@@ -166,22 +166,35 @@ def main(
     use_case = fabrica_use_case(args.voz)
 
     # Procesar cada archivo
+    exitos = 0
+    errores = 0
     for ruta in archivos:
         ruta_base = Path("audio") / ruta.stem
-        use_case.procesar(
-            Archivo(ruta),
-            ruta_base,
-            steps=args.steps,
-            speed=args.speed,
-            formatos=args.formatos,
-            on_progreso=_barra_progreso(ruta.stem),
-        )
+        cb_progreso, cerrar_barra = _barra_progreso(ruta.stem)
+        try:
+            use_case.procesar(
+                Archivo(ruta),
+                ruta_base,
+                steps=args.steps,
+                speed=args.speed,
+                formatos=args.formatos,
+                on_progreso=cb_progreso,
+            )
+            exitos += 1
+        except Exception as exc:
+            errores += 1
+            log.error("Falla al procesar '%s': %s", ruta.name, exc)
+        finally:
+            cerrar_barra()
 
-    log.info("✅ Todos los archivos procesados.")
+    if errores == 0:
+        log.info("✅ Todos los archivos procesados con éxito (%d/%d).", exitos, len(archivos))
+    else:
+        log.warning("Finalizado con advertencias: %d procesado(s) OK, %d error(es).", exitos, errores)
 
 
-def _barra_progreso(nombre: str) -> Callable[[int, int], None]:
-    """Devuelve un callback ``on_progreso`` que pinta una barra tqdm."""
+def _barra_progreso(nombre: str) -> Tuple[Callable[[int, int], None], Callable[[], None]]:
+    """Devuelve un callback ``on_progreso`` y una función para cerrar la barra tqdm."""
     total_ref: List[int] = [0]
     barra = tqdm(
         total=1,
@@ -198,4 +211,10 @@ def _barra_progreso(nombre: str) -> Callable[[int, int], None]:
         barra.n = actual
         barra.refresh()
 
-    return on_progreso
+    def cerrar() -> None:
+        try:
+            barra.close()
+        except Exception:
+            pass
+
+    return on_progreso, cerrar
