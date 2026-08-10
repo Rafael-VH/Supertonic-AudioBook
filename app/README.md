@@ -21,7 +21,7 @@ el código separado en capas (`domain/`, `data/`, `presentation/`) y el spec de 
 Incluye **dos interfaces**:
 
 - 🖥️ **CLI** — `python main.py --cli`: procesa archivos desde la terminal.
-- 🗔 **GUI** — `python main.py` (o `python main.py --gui`): ventana Tkinter con selección de archivos, formatos, voz, idioma de la voz y parámetros del TTS, tema claro/oscuro, idioma de la interfaz (ES/EN) y botón "Escuchar", sin necesidad de la terminal.
+- 🗔 **GUI** — `python main.py` (o `python main.py --gui`): ventana Tkinter con selección de archivos, formatos, voz, idioma de la voz y parámetros del TTS, tema claro/oscuro, estilo Material/Neumorfismo, idioma de la interfaz (ES/EN) y botón "Escuchar", sin necesidad de la terminal.
 
 ## Características
 
@@ -35,7 +35,7 @@ Incluye **dos interfaces**:
 - Barra de progreso con `tqdm` (opcional).
 - Logging granular (`--verbose` / `--quiet`).
 - En la GUI: cancelación en cualquier momento (exporta lo generado hasta entonces) y `--self-test` para verificar el motor sin abrir la ventana.
-- En la GUI: tema claro/oscuro, idioma de la interfaz ES/EN (ventana `⚙` de ajustes, se aplica y guarda al instante) e **idioma de la voz** (31 idiomas + auto).
+- En la GUI: tema claro/oscuro y estilo Material/Neumorfismo, idioma de la interfaz ES/EN (ventana `⚙` de ajustes, se aplican y guardan al instante) e **idioma de la voz** (31 idiomas + auto).
 - En la GUI: botón **`▶` Escuchar** que sintetiza y reproduce una muestra con la voz e idioma seleccionados.
 - **Arquitectura en capas**: `domain/` (reglas puras e interfaces), `data/` (implementaciones del motor, archivos y audio) y `presentation/` (CLI, GUI y self-test). `main.py` es la raíz de composición que las conecta.
 
@@ -111,7 +111,7 @@ La ventana permite:
 - Marcar los **formatos de salida** (`WAV`, `FLAC`, `OGG`, `MP3`; `WAV` y `MP3` marcados por defecto).
 - Elegir **voz** (`M1`–`M5`, `F1`–`F5`), **idioma de la voz** (31 idiomas + auto, por defecto español), **pasos** (slider 5–12) y **velocidad** (slider 0.7–2.0).
 - Botón **`▶` Escuchar** para sintetizar y reproducir una muestra con la voz e idioma elegidos.
-- `⚙` **Ajustes**: tema (claro/oscuro) e idioma de la interfaz (español/inglés); se aplican al instante y quedan guardados entre sesiones.
+- `⚙` **Ajustes**: tema (claro/oscuro), estilo (Material/Neumorfismo) e idioma de la interfaz (español/inglés); se aplican al instante y quedan guardados entre sesiones.
 - `Procesar` para lanzar la conversión en un hilo aparte (la interfaz no se congela) y `Cancelar` para detenerla — se exporta lo generado hasta el momento.
 - Seguir el avance con la barra de progreso y el panel de registro (log) con niveles coloreados.
 

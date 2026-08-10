@@ -49,7 +49,7 @@ python app/main.py --cli
 | 🖥️ **CLI + GUI** | 📦 **Empaquetable en `.exe`** | 💪 **Tolerante a fallos** |
 | Terminal con argparse o ventana Tkinter sin congelarse. | Aplicación one-folder e instalador portable de un solo archivo. | Un fragmento que falla no aborta el archivo. |
 | 🌙 **Tema + i18n ES/EN** | ⚙️ **Ventana de ajustes** | ▶️ **Escuchar muestra** |
-| GUI clara/oscura con interfaz en español o inglés. | Preferencias persistentes: tema, idioma, voz, idioma de la voz, formatos y carpetas. | Sintetiza y reproduce una muestra con la voz e idioma elegidos. |
+| GUI clara/oscura en estilo Material o Neumorfismo, con interfaz en español o inglés. | Preferencias persistentes: tema, estilo, idioma, voz, idioma de la voz, formatos y carpetas. | Sintetiza y reproduce una muestra con la voz e idioma elegidos. |
 
 ---
 
@@ -90,8 +90,8 @@ python app/main.py
 Ventana Tkinter con selección de archivos (`Todo` / `Nada` / `Refrescar`, multiselección con `Ctrl+clic`),
 carpetas de entrada/salida, formatos, voz, idioma de la voz (31 + auto), sliders de pasos (5–12) y velocidad
 (0.7–2.0), y un botón `▶ Escuchar` que reproduce una muestra con la voz e idioma elegidos.
-La ventana `⚙` de ajustes cambia el tema (claro/oscuro) y el idioma de la interfaz (ES/EN) al instante;
-las preferencias (tema, idioma, voz, idioma de la voz, formatos y carpetas) se guardan entre sesiones.
+La ventana `⚙` de ajustes cambia el tema (claro/oscuro), el estilo (Material/Neumorfismo) y el idioma de la interfaz (ES/EN) al instante;
+las preferencias (tema, estilo, idioma, voz, idioma de la voz, formatos y carpetas) se guardan entre sesiones.
 Se procesa en un hilo aparte (la interfaz nunca se congela) y `Cancelar` exporta lo generado hasta el momento.
 
 ### Self-test

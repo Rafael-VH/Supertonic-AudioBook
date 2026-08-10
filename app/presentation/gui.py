@@ -111,6 +111,36 @@ PALETA_OSCURA: dict = {
 }
 """Paleta oscura inspirada en Material Design 3 (baseline púrpura)."""
 
+NEUMO_CLARA: dict = {
+    "fondo": "#E8E4F0",
+    "superficie": "#E8E4F0",
+    "superficie_variante": "#DDD8EA",
+    "borde": "#CFC9DE",
+    "luz": "#FDFBFF",
+    "sombra": "#C2BAD6",
+    "primario_luz": "#FFFFFF",
+    "primario_sombra": "#574E8C",
+}
+"""Overrides neumórficos para el tema claro (se combinan con ``PALETA_CLARA``).
+
+En neumorfismo la superficie coincide con el fondo: los elementos se
+distinguen solo por las sombras suaves (``luz`` arriba-izquierda, ``sombra``
+abajo-derecha). ``primario_luz``/``primario_sombra`` matizan el bisel del
+botón de acción.
+"""
+
+NEUMO_OSCURA: dict = {
+    "fondo": "#1C1A23",
+    "superficie": "#1C1A23",
+    "superficie_variante": "#232029",
+    "borde": "#2C2836",
+    "luz": "#302C3C",
+    "sombra": "#0E0C12",
+    "primario_luz": "#E7D4FF",
+    "primario_sombra": "#8E77C8",
+}
+"""Overrides neumórficos para el tema oscuro (se combinan con ``PALETA_OSCURA``)."""
+
 IDIOMAS: dict = {"es": "Español", "en": "English"}
 """Idiomas disponibles para la interfaz (código -> nombre mostrado)."""
 
@@ -122,6 +152,9 @@ TRADUCCIONES: dict = {
         "idioma": "Idioma",
         "claro": "Claro",
         "oscuro": "Oscuro",
+        "estilo": "Estilo",
+        "estilo_material": "Material (actual)",
+        "estilo_neumorfismo": "Neumorfismo",
         "cerrar": "Cerrar",
         "tab_entrada": "Entrada y salida",
         "tab_sintesis": "Síntesis y registro",
@@ -195,6 +228,9 @@ TRADUCCIONES: dict = {
         "idioma": "Language",
         "claro": "Light",
         "oscuro": "Dark",
+        "estilo": "Style",
+        "estilo_material": "Material (current)",
+        "estilo_neumorfismo": "Neumorphism",
         "cerrar": "Close",
         "tab_entrada": "Input & output",
         "tab_sintesis": "Synthesis & log",
@@ -307,6 +343,7 @@ class AppLector(tk.Tk):
         self._repositorio_preferencias = repositorio_preferencias
 
         self._tema_oscuro = False
+        self._estilo_neumo = False
         self._paleta = dict(PALETA_CLARA)
         self._preferencias_cargadas = self._repositorio_preferencias.cargar()
 
@@ -714,6 +751,23 @@ class AppLector(tk.Tk):
                 command=self._aplicar_tema_desde_ajustes,
             ).pack(anchor="w", pady=2)
 
+        # --- Estilo ---
+        f_estilo = ttk.LabelFrame(marco, text=self.t("estilo"), style="Tarjeta.TLabelframe", padding=10)
+        f_estilo.pack(fill="x", pady=(10, 0))
+        var_estilo = tk.StringVar(value="neumo" if self._estilo_neumo else "material")
+        self._var_estilo_ajustes = var_estilo
+        for valor, etiqueta in (
+            ("material", self.t("estilo_material")),
+            ("neumo", self.t("estilo_neumorfismo")),
+        ):
+            ttk.Radiobutton(
+                f_estilo,
+                text=etiqueta,
+                variable=var_estilo,
+                value=valor,
+                command=self._aplicar_estilo_desde_ajustes,
+            ).pack(anchor="w", pady=2)
+
         # --- Idioma ---
         f_idioma = ttk.LabelFrame(marco, text=self.t("idioma"), style="Tarjeta.TLabelframe", padding=10)
         f_idioma.pack(fill="x", pady=(10, 0))
@@ -743,6 +797,13 @@ class AppLector(tk.Tk):
 
     def _aplicar_tema_desde_ajustes(self) -> None:
         self._aplicar_tema(self._var_tema_ajustes.get() == "oscuro")
+        self._guardar_preferencias()
+
+    def _aplicar_estilo_desde_ajustes(self) -> None:
+        self._aplicar_tema(
+            self._tema_oscuro,
+            neumo=self._var_estilo_ajustes.get() == "neumo",
+        )
         self._guardar_preferencias()
 
     def _aplicar_idioma_desde_ajustes(self, *_args) -> None:
@@ -784,9 +845,13 @@ class AppLector(tk.Tk):
             self._abrir_ajustes()
         self._set_ejecutando(self._en_ejecucion)
 
-    def _aplicar_tema(self, oscuro: bool) -> None:
+    def _aplicar_tema(self, oscuro: bool, neumo: Optional[bool] = None) -> None:
         self._tema_oscuro = oscuro
-        c = PALETA_OSCURA if oscuro else PALETA_CLARA
+        if neumo is not None:
+            self._estilo_neumo = neumo
+        c = dict(PALETA_OSCURA if oscuro else PALETA_CLARA)
+        if self._estilo_neumo:
+            c.update(NEUMO_OSCURA if oscuro else NEUMO_CLARA)
         self._paleta = c
 
         estilo = ttk.Style(self)
@@ -1003,13 +1068,216 @@ class AppLector(tk.Tk):
         )
         estilo.map("Vertical.TScrollbar", background=[("active", c["primario"])])
 
+        if self._estilo_neumo:
+            self._configurar_estilo_neumo(estilo, c)
+
         self.configure(bg=c["fondo"])
         self._estilizar_no_ttk()
         if self._ventana_ajustes is not None and self._ventana_ajustes.winfo_exists():
             self._ventana_ajustes.configure(bg=c["fondo"])
 
+    def _configurar_estilo_neumo(self, estilo: ttk.Style, c: dict) -> None:
+        """Ajusta los estilos base al look neumórfico (biseles luz/sombra suaves).
+
+        Tkinter no tiene sombras nativas; el neumorfismo se simula con el
+        relieve de clam: ``raised`` usa ``lightcolor`` arriba-izquierda y
+        ``darkcolor`` abajo-derecha (elemento saliente), ``sunken`` lo invierte
+        (elemento hundido). La superficie coincide con el fondo.
+        """
+        superficie = c["fondo"]
+
+        # Tarjetas: elevadas, sin borde duro
+        estilo.configure(
+            "Tarjeta.TLabelframe",
+            background=superficie,
+            bordercolor=c["borde"],
+            relief="raised",
+            borderwidth=1,
+            lightcolor=c["luz"],
+            darkcolor=c["sombra"],
+        )
+        estilo.configure("Tarjeta.TLabelframe.Label", background=superficie)
+
+        # Botón estándar: elevado; al presionar se hunde
+        estilo.configure(
+            "TButton",
+            background=superficie,
+            foreground=c["primario"],
+            bordercolor=c["borde"],
+            borderwidth=1,
+            relief="raised",
+            lightcolor=c["luz"],
+            darkcolor=c["sombra"],
+            padding=(14, 8),
+            font=("Segoe UI", 10),
+            focusthickness=0,
+        )
+        estilo.map(
+            "TButton",
+            relief=[("pressed", "sunken"), ("active", "raised")],
+            background=[("active", superficie)],
+        )
+
+        # Botón de acción: relleno primario con bisel en tonos del primario
+        estilo.configure(
+            "Principal.TButton",
+            background=c["primario"],
+            foreground=c["sobre_primario"],
+            borderwidth=1,
+            relief="raised",
+            lightcolor=c["primario_luz"],
+            darkcolor=c["primario_sombra"],
+            padding=(18, 9),
+            font=("Segoe UI", 10, "bold"),
+            focusthickness=0,
+        )
+        estilo.map(
+            "Principal.TButton",
+            relief=[("pressed", "sunken")],
+            background=[
+                ("active", c["primario_vivo"]),
+                ("disabled", c["superficie_variante"]),
+            ],
+            foreground=[("disabled", c["texto_secundario"])],
+        )
+
+        # Entradas y combos: hundidos (inset)
+        estilo.configure(
+            "TEntry",
+            fieldbackground=superficie,
+            foreground=c["texto"],
+            insertcolor=c["texto"],
+            bordercolor=c["borde"],
+            lightcolor=c["luz"],
+            darkcolor=c["sombra"],
+            borderwidth=1,
+            padding=(8, 6),
+        )
+        estilo.map("TEntry", bordercolor=[("focus", c["primario"])])
+        estilo.configure(
+            "TCombobox",
+            fieldbackground=superficie,
+            foreground=c["texto"],
+            arrowcolor=c["primario"],
+            bordercolor=c["borde"],
+            lightcolor=c["luz"],
+            darkcolor=c["sombra"],
+            borderwidth=1,
+        )
+        estilo.map(
+            "TCombobox",
+            fieldbackground=[("readonly", superficie)],
+            foreground=[("readonly", c["texto"])],
+        )
+
+        # Checkbuttons y radiobuttons sobre superficie uniforme
+        estilo.configure(
+            "TCheckbutton",
+            background=superficie,
+            foreground=c["texto"],
+            focuscolor=superficie,
+            bordercolor=c["borde"],
+        )
+        estilo.map(
+            "TCheckbutton",
+            background=[("active", superficie)],
+            indicatorcolor=[("selected", c["primario"]), ("!selected", superficie)],
+        )
+        estilo.configure(
+            "TRadiobutton",
+            background=superficie,
+            foreground=c["texto"],
+            focuscolor=superficie,
+        )
+        estilo.map(
+            "TRadiobutton",
+            background=[("active", superficie)],
+            indicatorcolor=[("selected", c["primario"]), ("!selected", superficie)],
+        )
+
+        # Chip de formato: elevado; seleccionado = hundido con acento primario
+        estilo.configure(
+            "Chip.TCheckbutton",
+            background=superficie,
+            foreground=c["texto"],
+            indicatorcolor=superficie,
+            bordercolor=c["borde"],
+            borderwidth=1,
+            relief="raised",
+            lightcolor=c["luz"],
+            darkcolor=c["sombra"],
+            padding=(12, 6),
+            focuscolor=superficie,
+        )
+        estilo.map(
+            "Chip.TCheckbutton",
+            relief=[("selected", "sunken")],
+            background=[("selected", superficie), ("active", superficie)],
+            foreground=[("selected", c["primario"]), ("active", c["texto"])],
+            indicatorcolor=[("selected", c["primario"]), ("!selected", superficie)],
+        )
+
+        # Slider, barra de progreso y scrollbar: canal hundido
+        estilo.configure(
+            "Horizontal.TScale",
+            background=superficie,
+            troughcolor=c["superficie_variante"],
+            borderwidth=1,
+            relief="sunken",
+            lightcolor=c["luz"],
+            darkcolor=c["sombra"],
+        )
+        estilo.map("Horizontal.TScale", background=[("active", superficie)])
+        estilo.configure(
+            "Horizontal.TProgressbar",
+            background=c["primario"],
+            troughcolor=c["superficie_variante"],
+            borderwidth=1,
+            relief="sunken",
+            lightcolor=c["luz"],
+            darkcolor=c["sombra"],
+        )
+        estilo.configure(
+            "Vertical.TScrollbar",
+            background=c["superficie_variante"],
+            troughcolor=superficie,
+            borderwidth=0,
+            arrowcolor=c["texto_secundario"],
+        )
+        estilo.map("Vertical.TScrollbar", background=[("active", c["primario"])])
+
     def _estilizar_no_ttk(self) -> None:
         c = self._paleta
+        if self._estilo_neumo:
+            superficie = c["fondo"]
+            self._lienzo.configure(bg=superficie, relief="sunken", bd=1, highlightthickness=0)
+            self._contenedor_check.configure(bg=superficie)
+            for check in self._checks.values():
+                check.configure(
+                    bg=superficie,
+                    fg=c["texto"],
+                    activebackground=superficie,
+                    activeforeground=c["texto"],
+                    selectcolor=superficie,
+                    bd=0,
+                    highlightthickness=0,
+                )
+            self._txt.configure(
+                bg=superficie,
+                fg=c["texto"],
+                insertbackground=c["texto"],
+                selectbackground=c["primario"],
+                selectforeground=c["sobre_primario"],
+                relief="sunken",
+                bd=1,
+                highlightthickness=0,
+            )
+            self._txt.tag_configure("info", foreground=c["texto"])
+            self._txt.tag_configure("warning", foreground=c["advertencia"])
+            self._txt.tag_configure("error", foreground=c["error"])
+            self._txt.tag_configure("debug", foreground=c["texto_secundario"])
+            return
+
         self._lienzo.configure(bg=c["superficie"])
         self._contenedor_check.configure(bg=c["superficie"])
         for check in self._checks.values():
@@ -1130,6 +1398,7 @@ class AppLector(tk.Tk):
     def _preferencias_actuales(self) -> Dict[str, object]:
         return {
             "tema_oscuro": self._tema_oscuro,
+            "estilo": "neumo" if self._estilo_neumo else "material",
             "idioma": self._idioma,
             "voz": self._var_voz.get(),
             "steps": int(round(self._var_steps.get())),
@@ -1149,6 +1418,8 @@ class AppLector(tk.Tk):
     def _aplicar_preferencias(self, prefs: Dict[str, object]) -> None:
         if not isinstance(prefs, dict):
             return
+        if isinstance(prefs.get("estilo"), str):
+            self._estilo_neumo = prefs["estilo"] == "neumo"
         if isinstance(prefs.get("voz"), str) and prefs["voz"] in VOCES:
             self._var_voz.set(prefs["voz"])
         if isinstance(prefs.get("steps"), int):
