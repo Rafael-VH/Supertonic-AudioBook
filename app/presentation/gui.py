@@ -11,6 +11,7 @@ import tempfile
 import threading
 import time
 import tkinter as tk
+import webbrowser
 import winsound
 from pathlib import Path
 from tkinter import filedialog, scrolledtext, ttk
@@ -181,6 +182,15 @@ SKEUO_OSCURA: dict = {
 ESTILOS: tuple = ("material", "neumo", "skeuo")
 """Estilos de interfaz disponibles (clave persistida en la preferencia ``estilo``)."""
 
+APP_NOMBRE: str = "Supertonic-AudioBook"
+"""Nombre mostrado de la aplicación (sección Acerca de)."""
+
+APP_VERSION: str = "1.0.3"
+"""Versión mostrada de la aplicación (alineada con el tag ``v1.0.3``)."""
+
+REPOSITORIO_URL: str = "https://github.com/Rafael-VH/Supertonic-AudioBook"
+"""URL del repositorio público (enlace de la sección Acerca de)."""
+
 IDIOMAS: dict = {"es": "Español", "en": "English"}
 """Idiomas disponibles para la interfaz (código -> nombre mostrado)."""
 
@@ -196,6 +206,12 @@ TRADUCCIONES: dict = {
         "estilo_material": "Material (actual)",
         "estilo_neumorfismo": "Neumorfismo",
         "estilo_skeuomorfismo": "Skeuomorfismo",
+        "acerca_de": "Acerca de",
+        "acerca_descripcion": "Convierte tus libros Markdown en audiolibros con voz sintética: 100 % local, sin nube y sin GPU.",
+        "acerca_version": "Versión",
+        "acerca_licencia": "Licencia MIT",
+        "acerca_creditos": "TTS on-device con Supertonic 3",
+        "acerca_abrir_repositorio": "Abrir repositorio en GitHub",
         "cerrar": "Cerrar",
         "tab_entrada": "Entrada y salida",
         "tab_sintesis": "Síntesis y registro",
@@ -273,6 +289,12 @@ TRADUCCIONES: dict = {
         "estilo_material": "Material (current)",
         "estilo_neumorfismo": "Neumorphism",
         "estilo_skeuomorfismo": "Skeuomorphism",
+        "acerca_de": "About",
+        "acerca_descripcion": "Turn your Markdown books into audiobooks with synthetic speech: 100 % local, no cloud, no GPU.",
+        "acerca_version": "Version",
+        "acerca_licencia": "MIT License",
+        "acerca_creditos": "On-device TTS with Supertonic 3",
+        "acerca_abrir_repositorio": "Open repository on GitHub",
         "cerrar": "Close",
         "tab_entrada": "Input & output",
         "tab_sintesis": "Synthesis & log",
@@ -825,6 +847,39 @@ class AppLector(tk.Tk):
         ).pack(anchor="w")
         var_idioma.trace_add("write", self._aplicar_idioma_desde_ajustes)
 
+        # --- Acerca de ---
+        f_acerca = ttk.LabelFrame(marco, text=self.t("acerca_de"), style="Tarjeta.TLabelframe", padding=10)
+        f_acerca.pack(fill="x", pady=(10, 0))
+        ttk.Label(f_acerca, text=APP_NOMBRE, style="Acerca.TLabel").pack(anchor="w")
+        ttk.Label(
+            f_acerca,
+            text=f"{self.t('acerca_version')} {APP_VERSION}",
+            style="AcercaTexto.TLabel",
+        ).pack(anchor="w", pady=(4, 0))
+        ttk.Label(
+            f_acerca,
+            text=self.t("acerca_descripcion"),
+            style="AcercaTexto.TLabel",
+            wraplength=300,
+            justify="left",
+        ).pack(anchor="w", pady=(4, 0))
+        ttk.Label(
+            f_acerca,
+            text=self.t("acerca_creditos"),
+            style="AcercaTexto.TLabel",
+        ).pack(anchor="w", pady=(4, 0))
+        ttk.Label(
+            f_acerca,
+            text=self.t("acerca_licencia"),
+            style="AcercaTexto.TLabel",
+        ).pack(anchor="w", pady=(4, 0))
+        ttk.Button(
+            f_acerca,
+            text=self.t("acerca_abrir_repositorio"),
+            style="Enlace.TButton",
+            command=self._abrir_repositorio,
+        ).pack(anchor="w", pady=(6, 0))
+
         f_acciones = ttk.Frame(marco)
         f_acciones.pack(fill="x", pady=(14, 0))
         ttk.Button(f_acciones, text=self.t("cerrar"), command=self._cerrar_ajustes).pack(side="right")
@@ -841,6 +896,13 @@ class AppLector(tk.Tk):
     def _aplicar_tema_desde_ajustes(self) -> None:
         self._aplicar_tema(self._var_tema_ajustes.get() == "oscuro")
         self._guardar_preferencias()
+
+    def _abrir_repositorio(self) -> None:
+        """Abre el repositorio del proyecto en el navegador predeterminado."""
+        try:
+            webbrowser.open(REPOSITORIO_URL)
+        except Exception:
+            logging.getLogger("lector").exception("No se pudo abrir el navegador")
 
     def _aplicar_estilo_desde_ajustes(self) -> None:
         self._aplicar_tema(self._tema_oscuro, estilo=self._var_estilo_ajustes.get())
@@ -952,6 +1014,33 @@ class AppLector(tk.Tk):
             background=c["error"],
             foreground=c["sobre_error"],
             font=("Segoe UI", 10, "bold"),
+        )
+
+        # Sección "Acerca de" de la ventana de ajustes
+        estilo.configure(
+            "Acerca.TLabel",
+            background=c["superficie"],
+            foreground=c["primario"],
+            font=("Segoe UI", 12, "bold"),
+        )
+        estilo.configure(
+            "AcercaTexto.TLabel",
+            background=c["superficie"],
+            foreground=c["texto"],
+        )
+        estilo.configure(
+            "Enlace.TButton",
+            background=c["superficie"],
+            foreground=c["primario"],
+            borderwidth=0,
+            padding=(0, 2),
+            font=("Segoe UI", 10, "underline"),
+            focuscolor=c["fondo"],
+        )
+        estilo.map(
+            "Enlace.TButton",
+            background=[("active", c["superficie"])],
+            foreground=[("active", c["primario_vivo"])],
         )
 
         # Tarjetas (LabelFrame con superficie elevada)
