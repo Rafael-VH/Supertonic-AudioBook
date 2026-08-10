@@ -191,6 +191,9 @@ APP_VERSION: str = "1.0.3"
 REPOSITORIO_URL: str = "https://github.com/Rafael-VH/Supertonic-AudioBook"
 """URL del repositorio público (enlace de la sección Acerca de)."""
 
+MODELO_URL: str = "https://huggingface.co/supertone-inc/supertonic-3"
+"""URL del modelo TTS (créditos de la sección Acerca de)."""
+
 IDIOMAS: dict = {"es": "Español", "en": "English"}
 """Idiomas disponibles para la interfaz (código -> nombre mostrado)."""
 
@@ -210,7 +213,8 @@ TRADUCCIONES: dict = {
         "acerca_descripcion": "Convierte tus libros Markdown en audiolibros con voz sintética: 100 % local, sin nube y sin GPU.",
         "acerca_version": "Versión",
         "acerca_licencia": "Licencia MIT",
-        "acerca_creditos": "TTS on-device con Supertonic 3",
+        "acerca_creditos": "Modelo de voz: Supertonic 3, de Supertone Inc. (licencia OpenRAIL-M)",
+        "acerca_ver_modelo": "Ver el modelo en Hugging Face",
         "acerca_abrir_repositorio": "Abrir repositorio en GitHub",
         "cerrar": "Cerrar",
         "tab_entrada": "Entrada y salida",
@@ -293,7 +297,8 @@ TRADUCCIONES: dict = {
         "acerca_descripcion": "Turn your Markdown books into audiobooks with synthetic speech: 100 % local, no cloud, no GPU.",
         "acerca_version": "Version",
         "acerca_licencia": "MIT License",
-        "acerca_creditos": "On-device TTS with Supertonic 3",
+        "acerca_creditos": "Speech model: Supertonic 3, by Supertone Inc. (OpenRAIL-M license)",
+        "acerca_ver_modelo": "View the model on Hugging Face",
         "acerca_abrir_repositorio": "Open repository on GitHub",
         "cerrar": "Close",
         "tab_entrada": "Input & output",
@@ -867,7 +872,15 @@ class AppLector(tk.Tk):
             f_acerca,
             text=self.t("acerca_creditos"),
             style="AcercaTexto.TLabel",
+            wraplength=300,
+            justify="left",
         ).pack(anchor="w", pady=(4, 0))
+        ttk.Button(
+            f_acerca,
+            text=self.t("acerca_ver_modelo"),
+            style="Enlace.TButton",
+            command=self._abrir_modelo,
+        ).pack(anchor="w", pady=(2, 0))
         ttk.Label(
             f_acerca,
             text=self.t("acerca_licencia"),
@@ -897,12 +910,18 @@ class AppLector(tk.Tk):
         self._aplicar_tema(self._var_tema_ajustes.get() == "oscuro")
         self._guardar_preferencias()
 
-    def _abrir_repositorio(self) -> None:
-        """Abre el repositorio del proyecto en el navegador predeterminado."""
+    def _abrir_enlace(self, url: str) -> None:
+        """Abre una URL en el navegador predeterminado."""
         try:
-            webbrowser.open(REPOSITORIO_URL)
+            webbrowser.open(url)
         except Exception:
             logging.getLogger("lector").exception("No se pudo abrir el navegador")
+
+    def _abrir_repositorio(self) -> None:
+        self._abrir_enlace(REPOSITORIO_URL)
+
+    def _abrir_modelo(self) -> None:
+        self._abrir_enlace(MODELO_URL)
 
     def _aplicar_estilo_desde_ajustes(self) -> None:
         self._aplicar_tema(self._tema_oscuro, estilo=self._var_estilo_ajustes.get())
